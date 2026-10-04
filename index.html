@@ -161,15 +161,69 @@ function hist(){
   return`<div class="card hc" data-t="${w.type}"><b>${fd(w.date)}</b><span class="bd">${w.type}</span><div class="mut">${w.dur} menit · Total ${fmt(w.vol)} kg</div>`+ex.map(e=>`<p style="margin-top:6px"><b>${esc(e)}</b><br>${ss.filter(s=>s.ex===e).map(s=>`${s.w} × ${s.r}`).join('<br>')}</p>`).join('')+(w.notes?`<p class="mut">${esc(w.notes)}</p>`:'')+`</div>`}).join('')||'<p class="mut">Tidak ada workout.</p>')}
 
 function prog(){
- const names=[...new Set(S.sets.map(s=>s.ex))].sort();if(!names.length)return'<h2>Progress</h2><p class="mut">Selesaikan workout pertama untuk melihat progress.</p>';
+ const names=[...new Set(S.sets.map(s=>s.ex))].sort();
+ if(!names.length)return'<h2>Progress</h2><p class="mut">Selesaikan workout pertama untuk melihat progress.</p>';
+
  if(!names.includes(pe))pe=names[0];
- const h=exH(pe),all=S.sets.filter(s=>s.ex===pe),str=x=>x?x.ss.map(s=>`${s.w}×${s.r}`).join(', '):'–',L=h[h.length-1],P=h[h.length-2];
- const seq=h.map(x=>x.mw).filter((v,i,a)=>i===0||v!==a[i-1]).slice(-8).join(' → ');
- return`<h2>Progress</h2><select onchange="pe=this.value;render()">${names.map(n=>`<option ${n===pe?'selected':''}>${esc(n)}</option>`).join('')}</select>
- <div class="grid" style="margin-top:10px">${tile('Best weight',Math.max(...all.map(s=>s.w))+' kg')}${tile('Best reps',Math.max(...all.map(s=>s.r)))}${tile('Best volume',fmt(Math.max(...all.map(s=>s.vol)))+' kg')}</div>
- <div class="card"><div class="row"><span class="k">Last workout</span><span>${L?fd(L.date):''}</span></div>${str(L)}<div class="row" style="margin-top:6px"><span class="k">Previous workout</span><span>${P?fd(P.date):''}</span></div>${str(P)}</div>
- <div class="card"><div class="k">${esc(pe)} progress</div><p>${seq}</p>${chart(h.map(x=>({v:x.mw})),' kg')}</div>
- <div class="card"><div class="k">Personal record</div>${S.prs.filter(p=>p.ex===pe).reverse().map(p=>`<div class="row"><span>🏆 ${p.type}</span><span>${p.w} kg × ${p.r} · ${fd(p.date)}</span></div>`).join('')||'<p class="mut">Belum ada PR.</p>'}</div>`}
+
+ const h=exH(pe),
+       all=S.sets.filter(s=>s.ex===pe),
+       str=x=>x?x.ss.map(s=>`${s.w}×${s.r}`).join(', '):'–',
+       L=h[h.length-1],
+       P=h[h.length-2];
+
+ // Set terakhir pada workout terakhir exercise ini
+ const current=L?.ss?.length ? L.ss[L.ss.length-1] : null;
+
+ const seq=h.map(x=>x.mw)
+   .filter((v,i,a)=>i===0||v!==a[i-1])
+   .slice(-8)
+   .join(' → ');
+
+ return`
+ <h2>Progress</h2>
+
+ <select onchange="pe=this.value;render()">
+   ${names.map(n=>`<option ${n===pe?'selected':''}>${esc(n)}</option>`).join('')}
+ </select>
+
+ <div class="grid" style="margin-top:10px">
+   ${tile('Beban terkini',current?current.w+' kg':'–')}
+   ${tile('Reps terkini',current?current.r+' reps':'–')}
+   ${tile('Best weight',Math.max(...all.map(s=>s.w))+' kg')}
+   ${tile('Best reps',Math.max(...all.map(s=>s.r)))}
+ </div>
+
+ <div class="card">
+   <div class="row">
+     <span class="k">Workout terakhir</span>
+     <span>${L?fd(L.date):''}</span>
+   </div>
+   ${str(L)}
+
+   <div class="row" style="margin-top:6px">
+     <span class="k">Previous workout</span>
+     <span>${P?fd(P.date):''}</span>
+   </div>
+   ${str(P)}
+ </div>
+
+ <div class="card">
+   <div class="k">${esc(pe)} progress</div>
+   <p>${seq}</p>
+   ${chart(h.map(x=>({v:x.mw})),' kg')}
+ </div>
+
+ <div class="card">
+   <div class="k">Personal record</div>
+   ${S.prs.filter(p=>p.ex===pe).reverse().map(p=>
+     `<div class="row">
+       <span>🏆 ${p.type}</span>
+       <span>${p.w} kg × ${p.r} · ${fd(p.date)}</span>
+     </div>`
+   ).join('')||'<p class="mut">Belum ada PR.</p>'}
+ </div>`;
+}
 
 function body(){
  const L=[...S.body].sort((a,b)=>a.date<b.date?1:-1).slice(0,10);
