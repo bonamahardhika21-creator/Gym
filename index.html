@@ -94,7 +94,16 @@ async function pull(){
    S.sets=j.SETS.map(r=>({id:r.set_id,wid:r.workout_id,ex:r.exercise,n:+r.set_number,w:+r.weight,r:+r.reps,rpe:n(r.rpe),vol:+r.volume,notes:r.notes}))}
   if(j.EXERCISES.length)S.exercises=j.EXERCISES.map(r=>({id:r.exercise_id,name:r.exercise_name,active:r.active!==false&&r.active!=='FALSE'}));
   if(j.BODY_PROGRESS.length)S.body=j.BODY_PROGRESS.map(r=>({date:r.date,w:n(r.weight),waist:n(r.waist),bf:n(r.body_fat),mm:n(r.muscle_mass),notes:r.notes}));
-  if(j.PERSONAL_RECORDS.length)S.prs=j.PERSONAL_RECORDS.map(r=>({date:r.date,ex:r.exercise,type:r.record_type,w:+r.weight,r:+r.reps,vol:+r.volume}));
+  if(j.PERSONAL_RECORDS.length){
+  S.prs=j.PERSONAL_RECORDS.map(r=>({
+    date:dateOnly(r.date),
+    ex:r.exercise,
+    type:r.record_type,
+    w:+r.weight,
+    r:+r.reps,
+    vol:+r.volume
+  }));
+}
   save();render();alert('Data dari Google Sheets dimuat.')}catch(e){setSt('err');alert('Gagal menarik data. Periksa URL Web App.')}}
 function cfg(){const m=document.createElement('div');m.className='mod';m.id='cfg';
  m.innerHTML=`<div><h2>Google Sheets</h2><label class="k">URL Web App (Apps Script)</label><input id="u" value="${esc(S.url)}" placeholder="https://script.google.com/macros/s/.../exec">
