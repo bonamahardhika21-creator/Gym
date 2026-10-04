@@ -1,12 +1,9 @@
 <!DOCTYPE html><html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3B2FF0"><title>Gym Log</title>
-<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F1F0F7"><title>Gym Log</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#F1F0F7;--card:#fff;--ink:#14122B;--mut:#7A7891;--ac:#3B2FF0;--ln:#E4E2EE;--ok:#14A06B;--er:#E5384B;--soft:#F6F5FB}
-[data-t=PUSH]{--tc:#FF6A3D}[data-t=PULL]{--tc:#2E8BFF}[data-t=LEGS]{--tc:#12B76A}[data-t=UPPER]{--tc:#8B5CF6}[data-t="CHEST+ARM"]{--tc:#EC4899}
 *{box-sizing:border-box;margin:0}
 body{font:15px/1.4 Barlow,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom))}
 header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;position:sticky;top:0;background:var(--bg);z-index:5}
@@ -55,15 +52,17 @@ nav button.on{background:#ffffff24;color:#fff}
 .pr{background:#FFF4CC;border:1px solid #F5B700;color:#6b5000;font-weight:600}
 .t5{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.t5 button{background:var(--tc);font:700 22px 'Barlow Condensed',sans-serif;padding:20px;border-radius:18px}.t5 button:first-child{grid-column:span 2}
 label{display:block;margin-top:8px}
-</style></head><body>
-<header><h1 style="display:flex;align-items:center;gap:8px"><img src="icon-192.png" width="32" height="32" alt="" style="border-radius:9px">Gym Log</h1><button class="pill" id="pill" onclick="cfg()">⚪</button></header>
+</style><style id="tcs"></style></head><body>
+<header><h1>Gym Log</h1><button class="pill" id="pill" onclick="cfg()">⚪</button></header>
 <main id="app"></main>
 <nav id="nav"></nav>
 <datalist id="dl"></datalist>
 <script>
 const TYPES=['PUSH','PULL','LEGS','UPPER','CHEST+ARM'],MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],K='gymlog_v1';
+const PAL=['#FF6A3D','#2E8BFF','#12B76A','#8B5CF6','#EC4899','#F59E0B','#06B6D4','#84CC16','#EF4444','#6366F1'];
 const DEF_EX=['Bench Press','Incline Bench Press','Incline Dumbbell Press','Dumbbell Press','Shoulder Press','Lat Pulldown','Seated Row','Barbell Row','Cable Row','Face Pull','Squat','Leg Press','Leg Extension','Leg Curl','Romanian Deadlift','Calf Raise','Dumbbell Curl','Bicep Curl','Tricep Pushdown','Lateral Raise'];
 const DEF_TPL={PUSH:['Bench Press','Incline Dumbbell Press','Shoulder Press','Lateral Raise','Tricep Pushdown'],PULL:['Lat Pulldown','Seated Row','Face Pull','Dumbbell Curl'],LEGS:['Squat','Leg Press','Leg Extension','Leg Curl','Calf Raise'],UPPER:['Bench Press','Lat Pulldown','Shoulder Press','Seated Row','Lateral Raise','Bicep Curl','Tricep Pushdown'],'CHEST+ARM':['Bench Press','Incline Dumbbell Press','Dumbbell Press','Dumbbell Curl','Bicep Curl','Tricep Pushdown']};
+const DEF_COL=Object.fromEntries(TYPES.map((t,i)=>[t,PAL[i]]));
 const $=s=>document.querySelector(s),num=v=>Math.round(v*10)/10,fmt=n=>Math.round(n).toLocaleString('en-US');
 const pad=n=>String(n).padStart(2,'0'),slug=n=>n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const newWid=()=>{const d=new Date();return 'W'+String(d.getFullYear()).slice(2)+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())};
@@ -73,8 +72,8 @@ const addD=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);retu
 const mon=s=>addD(s,-((new Date(s+'T00:00:00').getDay()+6)%7));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let S=load(),tab='dash',tplT='PUSH',hf={t:'',m:today().slice(0,7)},pe='',syncing=false,stat='off';
-function load(){try{const s=JSON.parse(localStorage.getItem(K));if(s){if(!s.tpl['CHEST+ARM'])s.tpl['CHEST+ARM']=DEF_TPL['CHEST+ARM'];return s}}catch(e){}
- return{workouts:[],sets:[],exercises:DEF_EX.map((n,i)=>({id:'E'+(i+1),name:n,active:true})),body:[],prs:[],tpl:DEF_TPL,q:[],url:'',active:null}}
+function load(){try{const s=JSON.parse(localStorage.getItem(K));if(s){if(!s.tpl['CHEST+ARM'])s.tpl['CHEST+ARM']=DEF_TPL['CHEST+ARM'];if(!s.types)s.types=[...TYPES];if(!s.tcol)s.tcol={...DEF_COL};return s}}catch(e){}
+ return{workouts:[],sets:[],exercises:DEF_EX.map((n,i)=>({id:'E'+(i+1),name:n,active:true})),body:[],prs:[],tpl:JSON.parse(JSON.stringify(DEF_TPL)),types:[...TYPES],tcol:{...DEF_COL},q:[],url:'',active:null}}
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 
 /* ---------- Sync (offline queue -> Google Apps Script) ---------- */
@@ -110,6 +109,9 @@ function saveUrl(){S.url=$('#u').value.trim();
  save();$('#cfg').remove();sync()}
 
 /* ---------- Data helpers ---------- */
+const allT=()=>[...new Set([...S.types,...S.workouts.map(w=>w.type),...(S.active?[S.active.type]:[])])];
+const tc=t=>S.tcol[t]||'#7A7891';
+const hms=ms=>{const t=Math.max(0,Math.floor(ms/1000)),h=Math.floor(t/3600),m=Math.floor(t%3600/60);return(h?h+':'+pad(m):m)+':'+pad(t%60)};
 const bs=k=>S.body.filter(b=>b[k]!==''&&b[k]!=null).sort((a,b)=>a.date<b.date?-1:1);
 const wsorted=()=>[...S.workouts].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
 function exH(ex){const m={};S.sets.filter(s=>s.ex===ex).forEach(s=>(m[s.wid]=m[s.wid]||[]).push(s));
@@ -135,20 +137,23 @@ function dash(){
  `<div class="grid">${tile('Berat badan',lw?lw.w+' kg':'–')}${tile('Perubahan',lw&&pw?(lw.w-pw.w>0?'+':'')+num(lw.w-pw.w)+' kg':'–')}${tile('Lingkar pinggang',la?la.waist+' cm':'–')}${tile('Streak',c+' minggu')}
  ${tile('Volume minggu ini',fmt(vW)+' kg')}${tile('Bulan ini',inM.length+' workout')}${tile('Total volume',fmt(ws.reduce((a,x)=>a+x.vol,0))+' kg','dk')}${tile('Progress strength',ups+' exercise naik')}</div>
  <div class="card"><div class="k">Workout terakhir</div>${last?`<b>${last.type}</b> · ${fd(last.date)} · ${fmt(last.vol)} kg`:'Belum ada workout.'}</div>
- <div class="card"><div class="k">Frekuensi bulan ini</div>${TYPES.map(x=>{const n=inM.filter(m=>m.type===x).length,mx=Math.max(1,...TYPES.map(y=>inM.filter(m=>m.type===y).length));return`<div class="row"><span>${x}</span><b>${n} kali</b></div><div class="bar" data-t="${x}"><i style="width:${n/mx*100}%"></i></div>`}).join('')}</div>
+ <div class="card"><div class="k">Frekuensi bulan ini</div>${allT().map(x=>{const n=inM.filter(m=>m.type===x).length,mx=Math.max(1,...allT().map(y=>inM.filter(m=>m.type===y).length));return`<div class="row"><span>${x}</span><b>${n} kali</b></div><div class="bar" data-t="${x}"><i style="width:${n/mx*100}%"></i></div>`}).join('')}</div>
  <div class="card ins"><div class="k">Insight</div>${ins.map(i=>`<p>${i}</p>`).join('')}</div>
  <div class="card"><div class="k">Grafik berat badan</div>${chart(w.map(b=>({v:b.w})),' kg')}</div>
  <div class="card"><div class="k">Grafik lingkar pinggang</div>${chart(wa.map(b=>({v:b.waist})),' cm')}</div>`}
 
 function workout(){
  if(S.active)return act();
+ if(!S.types.includes(tplT))tplT=S.types[0]||'';
  const l=S.tpl[tplT]||[];
- return`<h2>Pilih workout</h2><div class="t5">${TYPES.map(t=>`<button data-t="${t}" onclick="start('${t}')">${t}</button>`).join('')}</div>
- <h2>Template</h2><div class="chips">${TYPES.map(t=>`<button data-t="${t}" class="chip ${t===tplT?'on':''}" onclick="tplT='${t}';render()">${t}</button>`).join('')}</div>
- <div class="card">${l.map((e,i)=>`<div class="row"><span>${esc(e)}</span><button class="x" onclick="tplRm(${i})">×</button></div>`).join('')||'<p class="mut">Template kosong.</p>'}
- <div style="display:flex;gap:6px;margin-top:8px"><input id="tn" list="dl" placeholder="Tambah exercise ke ${tplT}"><button onclick="tplAdd()">Tambah</button></div></div>`}
+ return`<h2>Pilih workout</h2><div class="t5">${S.types.map(t=>`<button data-t="${t}" onclick="start('${t}')">${t}</button>`).join('')||'<p class="mut" style="grid-column:span 2">Belum ada template. Buat di bawah.</p>'}</div>
+ <h2>Template</h2><div class="chips">${S.types.map(t=>`<button data-t="${t}" class="chip ${t===tplT?'on':''}" onclick="tplT='${t}';render()">${t}</button>`).join('')}</div>
+ ${tplT?`<div class="card"><div class="k">Exercise di ${esc(tplT)}</div>${l.map((e,i)=>`<div class="row"><span>${esc(e)}</span><button class="x" onclick="tplRm(${i})">×</button></div>`).join('')||'<p class="mut">Template kosong.</p>'}
+ <div style="display:flex;gap:6px;margin-top:8px"><input id="tn" list="dl" placeholder="Tambah exercise ke ${esc(tplT)}"><button onclick="tplAdd()">Tambah</button></div>
+ <button class="x" style="width:100%;margin-top:8px;color:var(--er);font-size:14px" onclick="tplDel()">Hapus template ${esc(tplT)}</button></div>`:''}
+ <div class="card"><div class="k">Buat template baru</div><div style="display:flex;gap:6px;margin-top:6px"><input id="nt" placeholder="Nama, mis. SHOULDER" autocapitalize="characters"><button onclick="tplNew()">Buat</button></div></div>`}
 function act(){const a=S.active;
- return`<div class="ah" data-t="${a.type}"><div class="big">${a.type}</div><div>${fd(a.date)}</div></div>`+a.ex.map((e,i)=>`<div class="card"><b>${esc(e.name)}</b><button class="x xn" onclick="rmEx(${i})">×</button>`+
+ return`<div class="ah" data-t="${a.type}"><div><div class="big">${a.type}</div><div>${fd(a.date)}</div></div><div style="text-align:right"><div class="k" style="color:#fffa">Durasi</div><div class="big" id="tm">${hms(Date.now()-a.start)}</div></div></div>`+a.ex.map((e,i)=>`<div class="card"><b>${esc(e.name)}</b><button class="x xn" onclick="rmEx(${i})">×</button>`+
  e.sets.map((s,j)=>`<div class="set"><span>Set ${j+1}<small id="v${i}_${j}">${vol(s)}</small></span><input inputmode="decimal" placeholder="kg" value="${s.w}" oninput="up(${i},${j},'w',this.value)"><input inputmode="numeric" placeholder="reps" value="${s.r}" oninput="up(${i},${j},'r',this.value)"><input inputmode="decimal" placeholder="RPE" value="${s.rpe}" oninput="up(${i},${j},'rpe',this.value)"><button class="x" onclick="rmSet(${i},${j})">×</button></div>`).join('')+
  `<button class="ghost" onclick="addSet(${i})">+ Add Set</button><input style="margin-top:8px" placeholder="Catatan (opsional)" value="${esc(e.notes)}" oninput="S.active.ex[${i}].notes=this.value;save()"></div>`).join('')+
  `<div class="card"><div style="display:flex;gap:6px"><input id="nx" list="dl" placeholder="Nama exercise"><button onclick="addEx()">Add</button></div><button class="ghost" onclick="addEx()">+ Add Exercise</button></div>
@@ -157,8 +162,8 @@ function act(){const a=S.active;
 
 function hist(){
  const ws=wsorted().reverse().filter(w=>(!hf.t||w.type===hf.t)&&(!hf.m||w.date.slice(0,7)===hf.m)),inM=S.workouts.filter(w=>!hf.m||w.date.slice(0,7)===hf.m);
- return`<h2>History</h2><input type="month" value="${hf.m}" onchange="hf.m=this.value;render()"><div class="chips"><button class="chip ${!hf.t?'on':''}" onclick="hf.t='';render()">Semua</button>${TYPES.map(t=>`<button data-t="${t}" class="chip ${hf.t===t?'on':''}" onclick="hf.t='${t}';render()">${t}</button>`).join('')}</div>
- <div class="card">${TYPES.map(t=>`<div class="row"><span>${t}</span><b>${inM.filter(w=>w.type===t).length} workouts</b></div>`).join('')}</div>`+
+ return`<h2>History</h2><input type="month" value="${hf.m}" onchange="hf.m=this.value;render()"><div class="chips"><button class="chip ${!hf.t?'on':''}" onclick="hf.t='';render()">Semua</button>${allT().map(t=>`<button data-t="${t}" class="chip ${hf.t===t?'on':''}" onclick="hf.t='${t}';render()">${t}</button>`).join('')}</div>
+ <div class="card">${allT().map(t=>`<div class="row"><span>${t}</span><b>${inM.filter(w=>w.type===t).length} workouts</b></div>`).join('')}</div>`+
  (ws.map(w=>{const ss=S.sets.filter(s=>s.wid===w.id),ex=[...new Set(ss.map(s=>s.ex))];
   return`<div class="card hc" data-t="${w.type}"><b>${fd(w.date)}</b><span class="bd">${w.type}</span><div class="mut">${w.dur} menit · Total ${fmt(w.vol)} kg</div>`+ex.map(e=>`<p style="margin-top:6px"><b>${esc(e)}</b><br>${ss.filter(s=>s.ex===e).map(s=>`${s.w} × ${s.r}`).join('<br>')}</p>`).join('')+(w.notes?`<p class="mut">${esc(w.notes)}</p>`:'')+`</div>`}).join('')||'<p class="mut">Tidak ada workout.</p>')}
 
@@ -194,6 +199,10 @@ function rmSet(i,j){S.active.ex[i].sets.splice(j,1);save();render()}
 function rmEx(i){S.active.ex.splice(i,1);save();render()}
 function up(i,j,k,v){S.active.ex[i].sets[j][k]=v;save();const el=$('#v'+i+'_'+j);if(el)el.textContent=vol(S.active.ex[i].sets[j])}
 function tplAdd(){const v=$('#tn').value.trim();if(!v)return;(S.tpl[tplT]=S.tpl[tplT]||[]).push(ensureEx(v));save();render()}
+function tplNew(){const n=$('#nt').value.toUpperCase().replace(/["'\\<>&`$]/g,'').trim();if(!n)return;if(S.types.includes(n))return alert('Template sudah ada.');
+ S.types.push(n);if(!S.tcol[n]){const u=Object.values(S.tcol);S.tcol[n]=PAL.find(c=>!u.includes(c))||PAL[S.types.length%PAL.length]}
+ S.tpl[n]=S.tpl[n]||[];tplT=n;save();render()}
+function tplDel(){if(!confirm('Hapus template '+tplT+'? Riwayat workout tetap aman.'))return;S.types=S.types.filter(t=>t!==tplT);delete S.tpl[tplT];tplT=S.types[0]||'';save();render()}
 function tplRm(i){S.tpl[tplT].splice(i,1);save();render()}
 function finish(){const a=S.active,exs=a.ex.map(e=>({...e,sets:e.sets.filter(s=>+s.w>0&&+s.r>0)})).filter(e=>e.sets.length);
  if(!exs.length)return alert('Isi minimal satu set (berat dan reps).');
@@ -207,18 +216,4 @@ function finish(){const a=S.active,exs=a.ex.map(e=>({...e,sets:e.sets.filter(s=>
  if(prs.length)S.q.push({sheet:'PERSONAL_RECORDS',rows:prs.map(p=>[p.date,p.ex,p.type,p.w,p.r,p.vol])});
  save();sync();tab='hist';hf={t:'',m:a.date.slice(0,7)};render();
  const m=document.createElement('div');m.className='mod';m.onclick=()=>m.remove();
- m.innerHTML=`<div><h2>Workout selesai</h2><p>${a.type} · ${dur} menit · ${fmt(tv)} kg</p>${prs.map(p=>`<div class="card pr">🏆 NEW PR — ${esc(p.ex)}<br>${p.type}: ${p.w} kg × ${p.r}<div class="mut">Previous: ${p.pw} kg × ${p.pr}</div></div>`).join('')}<button style="width:100%;margin-top:8px">OK</button></div>`;document.body.appendChild(m)}
-function saveBody(){const n=id=>$(id).value===''?'':+$(id).value.replace(',','.'),d=$('#bd').value;
- const r={date:d,w:n('#bw'),waist:n('#bp'),bf:n('#bf'),mm:n('#bm'),notes:$('#bn').value};
- if(!d||(r.w===''&&r.waist===''))return alert('Isi tanggal dan minimal berat atau pinggang.');
- S.body=S.body.filter(b=>b.date!==d);S.body.push(r);save();enq('BODY_PROGRESS',[[r.date,r.w,r.waist,r.bf,r.mm,r.notes]]);render()}
-
-const NAV=[['dash','<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/>','Dashboard'],['workout','<path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/>','Workout'],['hist','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>','History'],['prog','<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>','Progress'],['body','<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9a4 4 0 016 0M12 12l2-2"/>','Body']],V={dash,workout,hist,prog,body};
-function render(){const y=scrollY;$('#app').innerHTML=V[tab]();
- $('#nav').innerHTML=NAV.map(([k,i,l])=>`<button class="${k===tab?'on':''}" onclick="tab='${k}';render();scrollTo(0,0)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${i}</svg>${l}</button>`).join('');
- $('#dl').innerHTML=S.exercises.filter(e=>e.active).map(e=>`<option value="${esc(e.name)}">`).join('');
- setSt(stat);scrollTo(0,y)}
-addEventListener('online',sync);setInterval(sync,30000);
-render();sync();
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-</script></body></html>
+ m.innerHTML=`<div><h2>Workout selesai</h2><p>${a.type} · ${dur} menit · ${fmt(tv)}
