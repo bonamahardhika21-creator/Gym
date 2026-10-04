@@ -63,7 +63,8 @@ const TYPES=['PUSH','PULL','LEGS','UPPER','CHEST+ARM'],MON=['Jan','Feb','Mar','A
 const DEF_EX=['Bench Press','Incline Bench Press','Incline Dumbbell Press','Dumbbell Press','Shoulder Press','Lat Pulldown','Seated Row','Barbell Row','Cable Row','Face Pull','Squat','Leg Press','Leg Extension','Leg Curl','Romanian Deadlift','Calf Raise','Dumbbell Curl','Bicep Curl','Tricep Pushdown','Lateral Raise'];
 const DEF_TPL={PUSH:['Bench Press','Incline Dumbbell Press','Shoulder Press','Lateral Raise','Tricep Pushdown'],PULL:['Lat Pulldown','Seated Row','Face Pull','Dumbbell Curl'],LEGS:['Squat','Leg Press','Leg Extension','Leg Curl','Calf Raise'],UPPER:['Bench Press','Lat Pulldown','Shoulder Press','Seated Row','Lateral Raise','Bicep Curl','Tricep Pushdown'],'CHEST+ARM':['Bench Press','Incline Dumbbell Press','Dumbbell Press','Dumbbell Curl','Bicep Curl','Tricep Pushdown']};
 const $=s=>document.querySelector(s),num=v=>Math.round(v*10)/10,fmt=n=>Math.round(n).toLocaleString('en-US');
-const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const pad=n=>String(n).padStart(2,'0'),slug=n=>n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const newWid=()=>{const d=new Date();return 'W'+String(d.getFullYear()).slice(2)+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())};
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const today=()=>iso(new Date()),fd=s=>{const [y,m,d]=s.split('-');return d+' '+MON[m-1]+' '+y};
 const addD=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return iso(d)};
@@ -184,7 +185,7 @@ const vol=s=>fmt((+s.w||0)*(+s.r||0))+' kg';
 function start(t){S.active={type:t,date:today(),start:Date.now(),notes:'',ex:(S.tpl[t]||[]).map(blank)};save();render()}
 function blank(n){const l=[...S.sets].reverse().find(s=>s.ex===n);return{name:n,notes:'',sets:[{w:l?l.w:'',r:l?l.r:'',rpe:''}]}}
 function ensureEx(n){const f=S.exercises.find(e=>e.name.toLowerCase()===n.toLowerCase());if(f)return f.name;
- const e={id:uid('E'),name:n,active:true};S.exercises.push(e);enq('EXERCISES',[[e.id,e.name,true]]);return n}
+ const e={id:'E-'+slug(n),name:n,active:true};S.exercises.push(e);enq('EXERCISES',[[e.id,e.name,true]]);return n}
 function addEx(){const v=$('#nx').value.trim();if(!v)return;S.active.ex.push(blank(ensureEx(v)));save();render()}
 function addSet(i){const e=S.active.ex[i],l=e.sets[e.sets.length-1]||{w:'',r:''};e.sets.push({w:l.w,r:l.r,rpe:''});save();render()}
 function rmSet(i,j){S.active.ex[i].sets.splice(j,1);save();render()}
@@ -194,11 +195,11 @@ function tplAdd(){const v=$('#tn').value.trim();if(!v)return;(S.tpl[tplT]=S.tpl[
 function tplRm(i){S.tpl[tplT].splice(i,1);save();render()}
 function finish(){const a=S.active,exs=a.ex.map(e=>({...e,sets:e.sets.filter(s=>+s.w>0&&+s.r>0)})).filter(e=>e.sets.length);
  if(!exs.length)return alert('Isi minimal satu set (berat dan reps).');
- const wid=uid('W'),dur=Math.max(1,Math.round((Date.now()-a.start)/60000)),prs=[],rows=[];let tv=0;
+ const wid=newWid(),dur=Math.max(1,Math.round((Date.now()-a.start)/60000)),prs=[],rows=[];let tv=0,sn=0;
  exs.forEach(e=>{const pv=S.sets.filter(s=>s.ex===e.name),sets=e.sets.map(s=>({w:+s.w,r:+s.r,v:+s.w*+s.r})),best=(f)=>sets.reduce((m,s)=>f(s)>f(m)?s:m);
   if(pv.length)[['Maximum Weight',s=>s.w,p=>p.w],['Maximum Reps',s=>s.r,p=>p.r],['Maximum Volume',s=>s.v,p=>p.vol]].forEach(([n,f,g])=>{const b=best(f),old=pv.reduce((m,p)=>g(p)>g(m)?p:m);
    if(f(b)>g(old))prs.push({date:a.date,ex:e.name,type:n,w:b.w,r:b.r,vol:b.v,pw:old.w,pr:old.r})});
-  e.sets.forEach((s,j)=>{const o={id:uid('S'),wid,ex:e.name,n:j+1,w:+s.w,r:+s.r,rpe:s.rpe===''?'':+s.rpe,vol:+s.w*+s.r,notes:e.notes||''};tv+=o.vol;S.sets.push(o);rows.push(o)})});
+  e.sets.forEach((s,j)=>{const o={id:'S'+wid.slice(1)+'-'+pad(++sn),wid,ex:e.name,n:j+1,w:+s.w,r:+s.r,rpe:s.rpe===''?'':+s.rpe,vol:+s.w*+s.r,notes:e.notes||''};tv+=o.vol;S.sets.push(o);rows.push(o)})});
  const w={id:wid,date:a.date,type:a.type,dur,vol:tv,notes:a.notes};S.workouts.push(w);S.prs.push(...prs.map(({pw,pr,...p})=>p));S.active=null;save();
  S.q.push({sheet:'WORKOUTS',rows:[[w.id,w.date,w.type,w.dur,w.vol,w.notes]]},{sheet:'SETS',rows:rows.map(o=>[o.id,o.wid,o.ex,o.n,o.w,o.r,o.rpe,o.vol,o.notes])});
  if(prs.length)S.q.push({sheet:'PERSONAL_RECORDS',rows:prs.map(p=>[p.date,p.ex,p.type,p.w,p.r,p.vol])});
