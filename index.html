@@ -1,6 +1,8 @@
 <!DOCTYPE html><html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F1F0F7"><title>Gym Log</title>
+<meta name="theme-color" content="#3B2FF0"><title>Gym Log</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#F1F0F7;--card:#fff;--ink:#14122B;--mut:#7A7891;--ac:#3B2FF0;--ln:#E4E2EE;--ok:#14A06B;--er:#E5384B;--soft:#F6F5FB}
@@ -54,7 +56,7 @@ nav button.on{background:#ffffff24;color:#fff}
 .t5{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.t5 button{background:var(--tc);font:700 22px 'Barlow Condensed',sans-serif;padding:20px;border-radius:18px}.t5 button:first-child{grid-column:span 2}
 label{display:block;margin-top:8px}
 </style></head><body>
-<header><h1>Gym Log</h1><button class="pill" id="pill" onclick="cfg()">⚪</button></header>
+<header><h1 style="display:flex;align-items:center;gap:8px"><img src="icon-192.png" width="32" height="32" alt="" style="border-radius:9px">Gym Log</h1><button class="pill" id="pill" onclick="cfg()">⚪</button></header>
 <main id="app"></main>
 <nav id="nav"></nav>
 <datalist id="dl"></datalist>
@@ -218,4 +220,5 @@ function render(){const y=scrollY;$('#app').innerHTML=V[tab]();
  setSt(stat);scrollTo(0,y)}
 addEventListener('online',sync);setInterval(sync,30000);
 render();sync();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script></body></html>
