@@ -1,0 +1,5307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F1F0F7">
+<title>Gym Log</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F1F0F7;
+  --card:#fff;
+  --ink:#14122B;
+  --mut:#7A7891;
+  --ac:#3B2FF0;
+  --ln:#E4E2EE;
+  --ok:#14A06B;
+  --er:#E5384B;
+  --soft:#F6F5FB;
+}
+
+[data-t=PUSH]{--tc:#FF6A3D}
+[data-t=PULL]{--tc:#2E8BFF}
+[data-t=LEGS]{--tc:#12B76A}
+[data-t=UPPER]{--tc:#8B5CF6}
+[data-t="CHEST+ARM"]{--tc:#EC4899}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font:15px/1.4 Barlow,system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  padding:env(safe-area-inset-top) 0 calc(100px + env(safe-area-inset-bottom));
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+  position:sticky;
+  top:0;
+  background:rgba(241,240,247,.94);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  z-index:5;
+}
+
+h1,h2,.big{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+}
+
+h1{
+  font-size:28px;
+  letter-spacing:.3px;
+}
+
+h2{
+  font-size:22px;
+  margin:4px 0 8px;
+}
+
+#app{
+  padding:0 14px 20px;
+  max-width:560px;
+  margin:auto;
+}
+
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:10px;
+  position:relative;
+  box-shadow:0 2px 10px #14122B08;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.grid .card{
+  margin:0;
+  border-radius:16px;
+}
+
+.k,.mut{
+  color:var(--mut);
+  font-size:12px;
+}
+
+.big{
+  font-size:28px;
+  line-height:1.1;
+}
+
+.big small{
+  font-size:16px;
+  margin-left:6px;
+  opacity:.7;
+  font-weight:600;
+}
+
+button{
+  font:inherit;
+  cursor:pointer;
+  border:0;
+  border-radius:12px;
+  padding:10px 14px;
+  background:var(--ink);
+  color:#fff;
+  font-weight:600;
+  transition:transform .12s ease,opacity .12s ease;
+}
+
+button:active{
+  transform:scale(.97);
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.pri{
+  background:var(--ac);
+  width:100%;
+  font:700 20px 'Barlow Condensed',sans-serif;
+  padding:16px;
+  margin-bottom:10px;
+  border-radius:16px;
+}
+
+.fin{
+  background:var(--ok);
+}
+
+.ghost{
+  background:none;
+  color:var(--ac);
+  border:1.5px dashed var(--ac);
+  width:100%;
+  margin-top:8px;
+}
+
+.x{
+  background:none;
+  color:var(--mut);
+  padding:4px 8px;
+  font-size:18px;
+}
+
+.hero{
+  background:var(--ac);
+  color:#fff;
+  border-radius:24px;
+  padding:18px;
+  margin-bottom:12px;
+  box-shadow:0 10px 30px #3B2FF025;
+}
+
+.hero .k{
+  color:#fffa;
+}
+
+.hero .big{
+  font-size:68px;
+  line-height:.95;
+  margin-top:2px;
+}
+
+.wk{
+  display:flex;
+  justify-content:space-between;
+  margin-top:16px;
+}
+
+.wk span{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#ffffff26;
+  display:grid;
+  place-items:center;
+  font-weight:600;
+  font-size:13px;
+  color:#ffffffcc;
+}
+
+.wk span.on{
+  background:var(--tc);
+  color:#fff;
+  box-shadow:0 0 0 2px #fff;
+}
+
+.go{
+  background:#fff;
+  color:var(--ac);
+  width:100%;
+  margin-top:16px;
+  font:700 20px 'Barlow Condensed',sans-serif;
+  padding:14px;
+  border-radius:14px;
+}
+
+.ah{
+  background:var(--tc,var(--ac));
+  color:#fff;
+  border-radius:20px;
+  padding:16px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  box-shadow:0 8px 24px #14122B18;
+}
+
+.ah .big{
+  font-size:42px;
+}
+
+.chips{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin:8px 0;
+}
+
+.chip{
+  background:#fff;
+  color:var(--ink);
+  padding:8px 14px;
+  border-radius:99px;
+}
+
+.chip[data-t]{
+  box-shadow:inset 0 -3px 0 var(--tc);
+}
+
+.chip.on{
+  background:var(--tc,var(--ink));
+  color:#fff;
+  box-shadow:none;
+}
+
+input,
+select,
+textarea{
+  font:inherit;
+  padding:11px 12px;
+  border:1.5px solid transparent;
+  border-radius:12px;
+  width:100%;
+  background:var(--soft);
+  color:var(--ink);
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  outline:none;
+  border-color:var(--ac);
+  background:#fff;
+}
+
+.set{
+  display:grid;
+  grid-template-columns:58px 1fr 1fr 56px 26px;
+  gap:5px;
+  align-items:center;
+  margin-top:8px;
+}
+
+.set input{
+  text-align:center;
+  font-weight:600;
+  font-size:17px;
+  padding:12px 4px;
+}
+
+.set small{
+  display:block;
+  color:var(--mut);
+  font-size:11px;
+}
+
+.xn{
+  position:absolute;
+  right:6px;
+  top:6px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:3px 0;
+}
+
+.pill{
+  font-size:13px;
+  background:#fff;
+  color:var(--ink);
+  padding:6px 12px;
+  border-radius:99px;
+}
+
+.dk{
+  background:var(--ink)!important;
+  color:#fff;
+}
+
+.dk .k{
+  color:#fff9;
+}
+
+.ins{
+  background:#E9E7FF!important;
+}
+
+.ins p{
+  margin-top:4px;
+}
+
+.bar{
+  height:8px;
+  background:var(--soft);
+  border-radius:9px;
+  overflow:hidden;
+  margin:2px 0 8px;
+}
+
+.bar i{
+  display:block;
+  height:100%;
+  background:var(--tc);
+  border-radius:9px;
+}
+
+.hc{
+  border-left:6px solid var(--tc);
+}
+
+.bd{
+  background:var(--tc);
+  color:#fff;
+  border-radius:99px;
+  padding:2px 10px;
+  font-size:12px;
+  font-weight:600;
+  margin-left:4px;
+}
+
+nav{
+  position:fixed;
+  left:12px;
+  right:12px;
+  bottom:calc(10px + env(safe-area-inset-bottom));
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  background:var(--ink);
+  border-radius:24px;
+  padding:6px;
+  z-index:6;
+  max-width:536px;
+  margin:auto;
+  box-shadow:0 10px 30px #14122B30;
+}
+
+nav button{
+  background:none;
+  color:#ffffff99;
+  padding:8px 2px;
+  font-size:11px;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+
+nav button.on{
+  background:#ffffff24;
+  color:#fff;
+}
+
+.mod{
+  position:fixed;
+  inset:0;
+  background:#0008;
+  display:flex;
+  z-index:9;
+}
+
+.mod>div{
+  background:#fff;
+  width:100%;
+  max-width:560px;
+  margin:auto auto 0;
+  border-radius:24px 24px 0 0;
+  padding:18px;
+  max-height:88vh;
+  overflow:auto;
+}
+
+.ch{
+  width:100%;
+  height:auto;
+}
+
+.pr{
+  background:#FFF4CC;
+  border:1px solid #F5B700;
+  color:#6b5000;
+  font-weight:600;
+}
+
+.t5{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-bottom:14px;
+}
+
+.t5 button{
+  background:var(--tc,var(--ac));
+  font:700 21px 'Barlow Condensed',sans-serif;
+  padding:20px 12px;
+  border-radius:18px;
+  box-shadow:0 5px 14px #14122B12;
+}
+
+.t5 button:first-child{
+  grid-column:span 2;
+}
+
+label{
+  display:block;
+  margin-top:8px;
+}
+
+/* ---------- Custom dialogs ---------- */
+
+.dialog-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(20,18,43,.58);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  z-index:50;
+  padding:14px;
+}
+
+.dialog{
+  width:100%;
+  max-width:560px;
+  background:var(--card);
+  border-radius:24px;
+  padding:20px;
+  box-shadow:0 18px 60px #0004;
+  animation:dialogIn .18s ease-out;
+}
+
+@keyframes dialogIn{
+  from{
+    transform:translateY(18px);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
+
+.dialog h3{
+  font:700 26px 'Barlow Condensed',sans-serif;
+  margin-bottom:5px;
+}
+
+.dialog .dialog-sub{
+  color:var(--mut);
+  font-size:13px;
+  margin-bottom:14px;
+}
+
+.dialog-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+
+.dialog-actions button{
+  padding:13px 12px;
+}
+
+.dialog-actions .cancel{
+  background:var(--soft);
+  color:var(--ink);
+}
+
+.dialog-actions .danger{
+  background:var(--er);
+}
+
+.dialog-actions .primary{
+  background:var(--ac);
+}
+
+.tpl-tools{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin:8px 0 10px;
+}
+
+.tpl-tools button{
+  flex:1;
+  min-width:110px;
+}
+
+.tpl-tools .secondary{
+  background:var(--soft);
+  color:var(--ink);
+}
+
+.tpl-list{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.tpl-empty{
+  padding:12px;
+  border:1px dashed var(--ln);
+  border-radius:14px;
+  color:var(--mut);
+  text-align:center;
+}
+
+.empty{
+  padding:14px;
+  text-align:center;
+  color:var(--mut);
+}
+
+.toast{
+  position:fixed;
+  left:16px;
+  right:16px;
+  bottom:92px;
+  max-width:528px;
+  margin:auto;
+  background:var(--ink);
+  color:#fff;
+  padding:12px 14px;
+  border-radius:14px;
+  z-index:20;
+  box-shadow:0 8px 30px #0002;
+}
+
+.smallbtn{
+  padding:7px 10px;
+  font-size:13px;
+}
+
+/* ---------- Workout timer ---------- */
+
+.wtimer{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  background:#ffffff24;
+  color:#fff;
+  border-radius:99px;
+  padding:7px 12px;
+  font-weight:700;
+  font-size:15px;
+  letter-spacing:.3px;
+}
+
+.wtimer i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#fff;
+  display:inline-block;
+  box-shadow:0 0 0 3px #ffffff22;
+}
+
+/* ---------- Cardio ---------- */
+
+.cardio-card{
+  background:linear-gradient(135deg,#fff 0%,#F7F6FF 100%);
+  border:1px solid var(--ln);
+  overflow:hidden;
+}
+
+.cardio-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.cardio-title{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.cardio-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#E9E7FF;
+  color:var(--ac);
+  display:grid;
+  place-items:center;
+  font-size:19px;
+}
+
+.cardio-title b{
+  font-size:17px;
+}
+
+.cardio-title span{
+  display:block;
+  color:var(--mut);
+  font-size:11px;
+  margin-top:1px;
+}
+
+.cardio-row{
+  display:grid;
+  grid-template-columns:1fr 105px;
+  gap:8px;
+}
+
+.cardio-row select,
+.cardio-row input{
+  background:#fff;
+  border:1.5px solid var(--ln);
+}
+
+.cardio-duration{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.cardio-duration input{
+  flex:1;
+}
+
+.cardio-duration span{
+  color:var(--mut);
+  font-size:12px;
+  font-weight:600;
+}
+
+.cardio-summary{
+  margin-top:10px;
+  padding:10px 12px;
+  background:var(--soft);
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.cardio-summary b{
+  color:var(--ac);
+}
+
+.history-cardio{
+  margin-top:8px;
+  padding:9px 11px;
+  border-radius:12px;
+  background:#F6F5FB;
+  color:var(--ink);
+  font-size:13px;
+}
+
+.history-cardio strong{
+  color:var(--ac);
+}
+
+@media(max-width:380px){
+  .cardio-row{
+    grid-template-columns:1fr;
+  }
+
+  .set{
+    grid-template-columns:52px 1fr 1fr 52px 24px;
+    gap:4px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Gym Log</h1>
+  <button class="pill" id="pill" onclick="cfg()">⚪ Belum terhubung</button>
+</header>
+
+<main id="app"></main>
+
+<nav id="nav"></nav>
+
+<datalist id="dl"></datalist>
+
+<div id="dialogRoot" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const TYPES=[
+  'PUSH',
+  'PULL',
+  'LEGS',
+  'UPPER',
+  'CHEST+ARM'
+];
+
+const MON=[
+  'Jan','Feb','Mar','Apr','May','Jun',
+  'Jul','Aug','Sep','Oct','Nov','Dec'
+];
+
+const DAY=['S','S','R','K','J','S','M'];
+
+const K='gymlog_v2';
+
+const DEF_EX=[
+  'Bench Press',
+  'Incline Bench Press',
+  'Incline Dumbbell Press',
+  'Dumbbell Press',
+  'Shoulder Press',
+  'Lat Pulldown',
+  'Seated Row',
+  'Barbell Row',
+  'Cable Row',
+  'Face Pull',
+  'Squat',
+  'Leg Press',
+  'Leg Extension',
+  'Leg Curl',
+  'Romanian Deadlift',
+  'Calf Raise',
+  'Dumbbell Curl',
+  'Bicep Curl',
+  'Tricep Pushdown',
+  'Lateral Raise'
+];
+
+const DEF_TPL={
+  PUSH:[
+    'Bench Press',
+    'Incline Dumbbell Press',
+    'Shoulder Press',
+    'Lateral Raise',
+    'Tricep Pushdown'
+  ],
+
+  PULL:[
+    'Lat Pulldown',
+    'Seated Row',
+    'Face Pull',
+    'Dumbbell Curl'
+  ],
+
+  LEGS:[
+    'Squat',
+    'Leg Press',
+    'Leg Extension',
+    'Leg Curl',
+    'Calf Raise'
+  ],
+
+  UPPER:[
+    'Bench Press',
+    'Lat Pulldown',
+    'Shoulder Press',
+    'Seated Row',
+    'Lateral Raise',
+    'Bicep Curl',
+    'Tricep Pushdown'
+  ],
+
+  'CHEST+ARM':[
+    'Bench Press',
+    'Incline Dumbbell Press',
+    'Dumbbell Press',
+    'Dumbbell Curl',
+    'Bicep Curl',
+    'Tricep Pushdown'
+  ]
+};
+
+const CARDIO_TYPES=[
+  'Treadmill',
+  'Sepeda',
+  'Elliptical',
+  'Stairmaster',
+  'Walking',
+  'Jogging',
+  'Rowing',
+  'Lainnya'
+];
+
+/* =========================================================
+   BASIC HELPERS
+========================================================= */
+
+const $=s=>document.querySelector(s);
+
+const num=v=>
+  Math.round((Number(v)||0)*10)/10;
+
+const fmt=n=>
+  (Number(n)||0).toLocaleString('en-US',{
+    maximumFractionDigits:0
+  });
+
+const pad=n=>
+  String(n).padStart(2,'0');
+
+const slug=n=>
+  String(n)
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g,'-')
+  .replace(/^-|-$/g,'');
+
+const esc=s=>
+  String(s??'')
+  .replace(/[&<>"]/g,c=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;'
+  }[c]));
+
+/* =========================================================
+   CUSTOM DIALOG SYSTEM
+========================================================= */
+
+let dialogOk=null;
+
+function closeDialog(){
+  const r=$('#dialogRoot');
+
+  if(r){
+    r.innerHTML='';
+  }
+
+  dialogOk=null;
+}
+
+function dialogShell(title,sub,body,actions){
+
+  const r=$('#dialogRoot');
+
+  if(!r)return;
+
+  r.innerHTML=`
+    <div class="dialog-backdrop" id="appDialogBackdrop">
+      <div
+        class="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialogTitle"
+      >
+        <h3 id="dialogTitle">${esc(title)}</h3>
+
+        ${
+          sub
+          ? `<div class="dialog-sub">${esc(sub)}</div>`
+          : ''
+        }
+
+        ${body}
+
+        <div class="dialog-actions">
+          ${actions}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const b=$('#appDialogBackdrop');
+
+  if(b){
+    b.addEventListener('click',e=>{
+      if(e.target===b){
+        closeDialog();
+      }
+    });
+  }
+}
+
+function uiAlert(message,title='Gym Log'){
+
+  dialogShell(
+    title,
+    '',
+    `<div style="font-size:15px;white-space:pre-line">
+      ${esc(message)}
+    </div>`,
+    `
+      <button
+        class="primary"
+        style="grid-column:1/-1"
+        onclick="closeDialog()"
+      >
+        Mengerti
+      </button>
+    `
+  );
+}
+
+function uiConfirm(message,onOk,title='Konfirmasi'){
+
+  dialogOk=
+    typeof onOk==='function'
+    ? onOk
+    : null;
+
+  dialogShell(
+    title,
+    '',
+    `<div style="font-size:15px;white-space:pre-line">
+      ${esc(message)}
+    </div>`,
+    `
+      <button
+        class="cancel"
+        onclick="closeDialog()"
+      >
+        Batal
+      </button>
+
+      <button
+        class="danger"
+        onclick="dialogConfirmSubmit()"
+      >
+        Lanjutkan
+      </button>
+    `
+  );
+}
+
+function dialogConfirmSubmit(){
+
+  const fn=dialogOk;
+
+  closeDialog();
+
+  if(fn){
+    fn();
+  }
+}
+
+function uiPrompt(
+  title,
+  sub,
+  value,
+  onOk,
+  placeholder='Ketik di sini…'
+){
+
+  dialogOk=
+    typeof onOk==='function'
+    ? onOk
+    : null;
+
+  dialogShell(
+    title,
+    sub,
+    `
+      <label
+        class="k"
+        for="dialogInput"
+      >
+        Nama
+      </label>
+
+      <input
+        id="dialogInput"
+        value="${esc(value||'')}"
+        placeholder="${esc(placeholder)}"
+        autocomplete="off"
+        enterkeyhint="done"
+      >
+    `,
+    `
+      <button
+        class="cancel"
+        onclick="closeDialog()"
+      >
+        Batal
+      </button>
+
+      <button
+        class="primary"
+        onclick="dialogSubmit()"
+      >
+        Simpan
+      </button>
+    `
+  );
+
+  setTimeout(()=>{
+
+    const i=$('#dialogInput');
+
+    if(i){
+
+      i.focus();
+      i.select();
+
+      i.addEventListener('keydown',e=>{
+
+        if(e.key==='Enter'){
+          e.preventDefault();
+          dialogSubmit();
+        }
+
+        if(e.key==='Escape'){
+          e.preventDefault();
+          closeDialog();
+        }
+
+      });
+
+    }
+
+  },30);
+}
+
+function dialogSubmit(){
+
+  const i=$('#dialogInput');
+
+  const v=i
+    ? i.value.trim()
+    : '';
+
+  if(!v){
+    i?.focus();
+    return;
+  }
+
+  const fn=dialogOk;
+
+  closeDialog();
+
+  if(fn){
+    fn(v);
+  }
+}
+
+addEventListener('keydown',e=>{
+
+  if(
+    e.key==='Escape' &&
+    $('#appDialogBackdrop')
+  ){
+    closeDialog();
+  }
+
+});
+
+/* =========================================================
+   DATE
+========================================================= */
+
+const today=()=>iso(new Date());
+
+function dateOnly(v){
+
+  if(
+    v===null ||
+    v===undefined ||
+    v===''
+  ){
+    return '';
+  }
+
+  if(
+    v instanceof Date &&
+    !isNaN(v)
+  ){
+    return iso(v);
+  }
+
+  const s=String(v).trim();
+
+  const m=s.match(
+    /^(\d{4})-(\d{2})-(\d{2})/
+  );
+
+  if(m){
+    return `${m[1]}-${m[2]}-${m[3]}`;
+  }
+
+  const dmy=s.match(
+    /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/
+  );
+
+  if(dmy){
+
+    return `${dmy[3]}-${pad(dmy[2])}-${pad(dmy[1])}`;
+
+  }
+
+  return s;
+}
+
+function parseDateLocal(s){
+
+  const d=dateOnly(s);
+
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){
+    return null;
+  }
+
+  const [
+    y,
+    m,
+    day
+  ]=d.split('-').map(Number);
+
+  const x=new Date(
+    y,
+    m-1,
+    day
+  );
+
+  return isNaN(x)
+    ? null
+    : x;
+}
+
+function iso(d){
+
+  return d.getFullYear()+
+    '-'+
+    pad(d.getMonth()+1)+
+    '-'+
+    pad(d.getDate());
+}
+
+function fd(s){
+
+  const d=dateOnly(s);
+
+  const m=d.match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if(!m){
+    return String(s||'–');
+  }
+
+  return `${m[3]} ${MON[Number(m[2])-1]} ${m[1]}`;
+}
+
+function addD(s,n){
+
+  const d=
+    parseDateLocal(s) ||
+    new Date();
+
+  d.setDate(
+    d.getDate()+n
+  );
+
+  return iso(d);
+}
+
+function mon(s){
+
+  const d=
+    parseDateLocal(s) ||
+    new Date();
+
+  const day=
+    (d.getDay()+6)%7;
+
+  d.setDate(
+    d.getDate()-day
+  );
+
+  return iso(d);
+}
+
+function monthKey(s){
+
+  return dateOnly(s).slice(0,7);
+
+}
+
+/* =========================================================
+   WORKOUT ID
+========================================================= */
+
+function newWid(){
+
+  const d=new Date();
+
+  return 'W'+
+    String(d.getFullYear()).slice(2)+
+    pad(d.getMonth()+1)+
+    pad(d.getDate())+
+    '-'+
+    pad(d.getHours())+
+    pad(d.getMinutes())+
+    pad(d.getSeconds())+
+    String(d.getMilliseconds())
+      .padStart(3,'0');
+}
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let S=load();
+
+let tab='dash';
+let tplT='PUSH';
+
+let hf={
+  t:'',
+  m:monthKey(today())
+};
+
+let pe='';
+
+let syncing=false;
+let stat='off';
+
+function defaultState(){
+
+  return {
+
+    workouts:[],
+
+    sets:[],
+
+    exercises:
+      DEF_EX.map((n,i)=>({
+        id:'E'+(i+1),
+        name:n,
+        active:true
+      })),
+
+    body:[],
+
+    prs:[],
+
+    tpl:
+      JSON.parse(
+        JSON.stringify(DEF_TPL)
+      ),
+
+    q:[],
+
+    url:'',
+
+    active:null,
+
+    exSynced:false
+
+  };
+
+}
+
+function load(){
+
+  try{
+
+    const raw=
+      localStorage.getItem(K);
+
+    if(raw){
+
+      const s=
+        JSON.parse(raw);
+
+      const d=
+        defaultState();
+
+      const out=
+        Object.assign(d,s);
+
+      out.tpl=
+        Object.assign(
+          d.tpl,
+          s.tpl||{}
+        );
+
+      if(
+        !out.tpl['CHEST+ARM']
+      ){
+        out.tpl['CHEST+ARM']=
+          DEF_TPL['CHEST+ARM'];
+      }
+
+      out.workouts=
+        Array.isArray(out.workouts)
+        ? out.workouts
+        : [];
+
+      out.sets=
+        Array.isArray(out.sets)
+        ? out.sets
+        : [];
+
+      out.exercises=
+        Array.isArray(out.exercises)
+        ? out.exercises
+        : d.exercises;
+
+      out.body=
+        Array.isArray(out.body)
+        ? out.body
+        : [];
+
+      out.prs=
+        Array.isArray(out.prs)
+        ? out.prs
+        : [];
+
+      out.q=
+        Array.isArray(out.q)
+        ? out.q
+        : [];
+
+      return out;
+    }
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+  return defaultState();
+
+}
+
+function save(){
+
+  try{
+
+    localStorage.setItem(
+      K,
+      JSON.stringify(S)
+    );
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function setSt(s){
+
+  stat=s;
+
+  const p=$('#pill');
+
+  if(!p)return;
+
+  const n=S.q.length;
+
+  p.textContent={
+
+    ok:'🟢 Synced',
+
+    sync:'🟡 Syncing',
+
+    err:
+      '🔴 Sync Error'+
+      (n?' ('+n+')':''),
+
+    off:
+      '⚪ Belum terhubung'+
+      (n?' ('+n+')':'')
+
+  }[s]||'⚪';
+
+}
+
+function toast(msg){
+
+  const old=$('.toast');
+
+  if(old){
+    old.remove();
+  }
+
+  const t=
+    document.createElement('div');
+
+  t.className='toast';
+
+  t.textContent=msg;
+
+  document.body.appendChild(t);
+
+  setTimeout(()=>{
+    t.remove();
+  },2600);
+
+}
+
+/* =========================================================
+   GOOGLE SHEETS
+========================================================= */
+
+function enq(sheet,rows){
+
+  if(
+    !rows ||
+    !rows.length
+  ){
+    return;
+  }
+
+  S.q.push({
+    sheet,
+    rows
+  });
+
+  save();
+
+  sync();
+
+}
+
+async function sync(){
+
+  if(!S.url){
+
+    setSt('off');
+
+    return;
+  }
+
+  if(syncing){
+    return;
+  }
+
+  syncing=true;
+
+  while(S.q.length){
+
+    setSt('sync');
+
+    try{
+
+      const r=
+        await fetch(
+          S.url,
+          {
+            method:'POST',
+            headers:{
+              'Content-Type':
+                'text/plain;charset=utf-8'
+            },
+            body:
+              JSON.stringify(
+                S.q[0]
+              )
+          }
+        );
+
+      const text=
+        await r.text();
+
+      let j;
+
+      try{
+
+        j=JSON.parse(text);
+
+      }catch(e){
+
+        throw new Error(
+          'Response bukan JSON'
+        );
+
+      }
+
+      if(!j.ok){
+
+        throw new Error(
+          j.error||'Sync gagal'
+        );
+
+      }
+
+      S.q.shift();
+
+      save();
+
+    }catch(e){
+
+      console.error(e);
+
+      setSt('err');
+
+      syncing=false;
+
+      return;
+    }
+
+  }
+
+  syncing=false;
+
+  setSt('ok');
+
+}
+
+function normalizeWorkoutRow(r){
+
+  return {
+
+    id:String(
+      r.workout_id??''
+    ),
+
+    date:dateOnly(r.date),
+
+    type:String(
+      r.workout_type??''
+    ),
+
+    dur:Number(
+      r.duration
+    )||0,
+
+    vol:Number(
+      r.total_volume
+    )||0,
+
+    cardioType:String(
+      r.cardio_type ??
+      r.cardioType ??
+      ''
+    ),
+
+    cardioDuration:Number(
+      r.cardio_duration ??
+      r.cardioDuration ??
+      0
+    )||0,
+
+    notes:String(
+      r.notes??''
+    )
+
+  };
+
+}
+
+function normalizeSetRow(r){
+
+  return {
+
+    id:String(
+      r.set_id??''
+    ),
+
+    wid:String(
+      r.workout_id??''
+    ),
+
+    ex:String(
+      r.exercise??''
+    ),
+
+    n:Number(
+      r.set_number
+    )||0,
+
+    w:Number(
+      r.weight
+    )||0,
+
+    r:Number(
+      r.reps
+    )||0,
+
+    rpe:
+      r.rpe==='' ||
+      r.rpe==null
+      ? ''
+      : Number(r.rpe),
+
+    vol:Number(
+      r.volume
+    )||0,
+
+    notes:String(
+      r.notes??''
+    )
+
+  };
+
+}
+
+function normalizeBodyRow(r){
+
+  return {
+
+    date:dateOnly(r.date),
+
+    w:
+      r.weight==='' ||
+      r.weight==null
+      ? ''
+      : Number(r.weight),
+
+    waist:
+      r.waist==='' ||
+      r.waist==null
+      ? ''
+      : Number(r.waist),
+
+    bf:
+      r.body_fat==='' ||
+      r.body_fat==null
+      ? ''
+      : Number(r.body_fat),
+
+    mm:
+      r.muscle_mass==='' ||
+      r.muscle_mass==null
+      ? ''
+      : Number(r.muscle_mass),
+
+    notes:String(
+      r.notes??''
+    )
+
+  };
+
+}
+
+async function pull(){
+
+  const cfgModal=$('#cfg');
+
+  if(cfgModal){
+    cfgModal.remove();
+  }
+
+  if(!S.url){
+
+    uiAlert(
+      'Masukkan URL Web App terlebih dahulu.',
+      'Google Sheets'
+    );
+
+    return;
+  }
+
+  await sync();
+
+  if(S.q.length){
+
+    uiAlert(
+      'Masih ada data yang belum terkirim. Pastikan status 🟢 Synced lalu coba lagi.',
+      'Sync belum selesai'
+    );
+
+    return;
+  }
+
+  try{
+
+    setSt('sync');
+
+    const sep=
+      S.url.includes('?')
+      ? '&'
+      : '?';
+
+    const response=
+      await fetch(
+        S.url+
+        sep+
+        'action=all&ts='+
+        Date.now(),
+        {
+          cache:'no-store'
+        }
+      );
+
+    const text=
+      await response.text();
+
+    let j;
+
+    try{
+
+      j=JSON.parse(text);
+
+    }catch(e){
+
+      throw new Error(
+        'Web App tidak mengembalikan JSON. Pastikan deployment Web App benar.'
+      );
+
+    }
+
+    S.workouts=
+      Array.isArray(j.WORKOUTS)
+      ? j.WORKOUTS.map(
+          normalizeWorkoutRow
+        )
+      : [];
+
+    S.sets=
+      Array.isArray(j.SETS)
+      ? j.SETS.map(
+          normalizeSetRow
+        )
+      : [];
+
+    if(
+      Array.isArray(j.EXERCISES) &&
+      j.EXERCISES.length
+    ){
+
+      S.exercises=
+        j.EXERCISES
+        .map(r=>({
+
+          id:String(
+            r.exercise_id??''
+          ),
+
+          name:String(
+            r.exercise_name??''
+          ),
+
+          active:
+            r.active!==false &&
+            String(
+              r.active
+            ).toUpperCase()!=='FALSE'
+
+        }))
+        .filter(e=>e.name);
+
+    }
+
+    S.body=
+      Array.isArray(j.BODY_PROGRESS)
+      ? j.BODY_PROGRESS.map(
+          normalizeBodyRow
+        )
+      : [];
+
+    S.prs=
+      Array.isArray(j.PERSONAL_RECORDS)
+      ? j.PERSONAL_RECORDS.map(r=>({
+
+          date:dateOnly(r.date),
+
+          ex:String(
+            r.exercise??''
+          ),
+
+          type:String(
+            r.record_type??''
+          ),
+
+          w:Number(
+            r.weight
+          )||0,
+
+          r:Number(
+            r.reps
+          )||0,
+
+          vol:Number(
+            r.volume
+          )||0
+
+        }))
+      : [];
+
+    S.workouts.forEach(w=>{
+      w.date=dateOnly(w.date);
+    });
+
+    S.body.forEach(b=>{
+      b.date=dateOnly(b.date);
+    });
+
+    S.prs.forEach(p=>{
+      p.date=dateOnly(p.date);
+    });
+
+    save();
+
+    setSt('ok');
+
+    render();
+
+    toast(
+      'Data dari Google Sheets berhasil dimuat.'
+    );
+
+  }catch(e){
+
+    console.error(e);
+
+    setSt('err');
+
+    uiAlert(
+      'Gagal menarik data dari Sheets.\n\n'+
+      e.message,
+      'Gagal menarik data'
+    );
+
+  }
+
+}
+
+function cfg(){
+
+  const old=$('#cfg');
+
+  if(old){
+
+    old.remove();
+
+    return;
+  }
+
+  const m=
+    document.createElement('div');
+
+  m.className='mod';
+
+  m.id='cfg';
+
+  m.innerHTML=`
+
+    <div>
+
+      <h2>Google Sheets</h2>
+
+      <label class="k">
+        URL Web App (Apps Script)
+      </label>
+
+      <input
+        id="u"
+        value="${esc(S.url)}"
+        placeholder="https://script.google.com/macros/s/.../exec"
+      >
+
+      <p
+        class="mut"
+        style="margin:8px 0"
+      >
+        Antrean belum terkirim:
+        ${S.q.length}
+      </p>
+
+      <button
+        style="width:100%;margin-top:6px"
+        onclick="saveUrl()"
+      >
+        Simpan &amp; Sync
+      </button>
+
+      <button
+        style="width:100%;margin-top:8px;background:#fff;color:var(--ink);border:1px solid var(--ln)"
+        onclick="pull()"
+      >
+        Tarik data dari Sheets
+      </button>
+
+      <button
+        style="width:100%;margin-top:8px;background:none;color:var(--mut)"
+        onclick="$('#cfg').remove()"
+      >
+        Tutup
+      </button>
+
+    </div>
+  `;
+
+  document.body.appendChild(m);
+
+}
+
+function saveUrl(){
+
+  const u=$('#u').value.trim();
+
+  S.url=
+    u.replace(/\s+/g,'');
+
+  if(
+    S.url &&
+    !S.exSynced
+  ){
+
+    S.exSynced=true;
+
+    S.q.push({
+
+      sheet:'EXERCISES',
+
+      rows:
+        S.exercises.map(e=>[
+          e.id,
+          e.name,
+          e.active
+        ])
+
+    });
+
+  }
+
+  save();
+
+  $('#cfg').remove();
+
+  sync();
+
+}
+
+/* =========================================================
+   DATA HELPERS
+========================================================= */
+
+const bs=k=>
+  S.body
+  .filter(b=>
+    b[k]!=='' &&
+    b[k]!=null &&
+    !isNaN(Number(b[k]))
+  )
+  .sort((a,b)=>
+    dateOnly(a.date)<
+    dateOnly(b.date)
+    ? -1
+    : 1
+  );
+
+const wsorted=()=>[...S.workouts].sort(
+  (a,b)=>{
+
+    const ad=dateOnly(a.date);
+    const bd=dateOnly(b.date);
+
+    return ad<bd
+      ? -1
+      : ad>bd
+      ? 1
+      : 0;
+
+  }
+);
+
+function exH(ex){
+
+  const m={};
+
+  S.sets
+    .filter(s=>s.ex===ex)
+    .forEach(
+      s=>
+        (
+          m[s.wid]||
+          (m[s.wid]=[])
+        ).push(s)
+    );
+
+  return Object
+    .entries(m)
+    .map(([id,ss])=>{
+
+      const w=
+        S.workouts.find(
+          x=>x.id===id
+        );
+
+      return {
+
+        date:
+          w
+          ? dateOnly(w.date)
+          : '',
+
+        ss,
+
+        mw:
+          ss.length
+          ? Math.max(
+              ...ss.map(
+                s=>Number(s.w)||0
+              )
+            )
+          : 0
+
+      };
+
+    })
+    .filter(x=>x.date)
+    .sort((a,b)=>
+      a.date<b.date
+      ? -1
+      : a.date>b.date
+      ? 1
+      : 0
+    );
+
+}
+
+function chart(pts,u){
+
+  pts=
+    pts
+    .filter(
+      x=>
+        x &&
+        isFinite(Number(x.v))
+    )
+    .slice(-30);
+
+  if(pts.length<2){
+
+    return `
+      <p class="mut">
+        Butuh minimal 2 data untuk grafik.
+      </p>
+    `;
+
+  }
+
+  const W=320;
+  const H=120;
+  const p=18;
+
+  const vs=
+    pts.map(
+      x=>Number(x.v)
+    );
+
+  let mn=Math.min(...vs);
+  let mx=Math.max(...vs);
+
+  if(mn===mx){
+
+    mn-=1;
+    mx+=1;
+
+  }
+
+  const X=i=>
+    p+
+    i*(W-2*p)/
+    (pts.length-1);
+
+  const Y=v=>
+    H-p-
+    (v-mn)/(mx-mn)*
+    (H-2*p);
+
+  return `
+    <svg
+      viewBox="0 0 ${W} ${H}"
+      class="ch"
+    >
+
+      <polygon
+        fill="#3B2FF0"
+        opacity=".1"
+        points="
+          ${X(0)},${H-p}
+          ${pts.map(
+            (x,i)=>
+              X(i)+','+
+              Y(Number(x.v))
+          ).join(' ')}
+          ${X(pts.length-1)},${H-p}
+        "
+      />
+
+      <polyline
+        fill="none"
+        stroke="#3B2FF0"
+        stroke-width="2.5"
+        points="
+          ${pts.map(
+            (x,i)=>
+              X(i)+','+
+              Y(Number(x.v))
+          ).join(' ')}
+        "
+      />
+
+      ${pts.map(
+        (x,i)=>`
+          <circle
+            cx="${X(i)}"
+            cy="${Y(Number(x.v))}"
+            r="3"
+            fill="#3B2FF0"
+          />
+        `
+      ).join('')}
+
+      <text
+        x="2"
+        y="12"
+        font-size="10"
+        fill="#6B7480"
+      >
+        ${num(mx)}${u}
+      </text>
+
+      <text
+        x="2"
+        y="${H-4}"
+        font-size="10"
+        fill="#6B7480"
+      >
+        ${num(mn)}${u}
+      </text>
+
+    </svg>
+  `;
+
+}
+
+const tile=(k,v,c='')=>
+  `
+    <div class="card ${c}">
+      <div class="k">${k}</div>
+      <div class="big">${v}</div>
+    </div>
+  `;
+
+/* =========================================================
+   WORKOUT TIMER
+========================================================= */
+
+function fmtTime(sec){
+
+  sec=
+    Math.max(
+      0,
+      Math.floor(
+        Number(sec)||0
+      )
+    );
+
+  const h=
+    Math.floor(
+      sec/3600
+    );
+
+  const m=
+    Math.floor(
+      (sec%3600)/60
+    );
+
+  const s=
+    sec%60;
+
+  return (
+    h
+      ? String(h).padStart(2,'0')+':'
+      : ''
+  )+
+  String(m).padStart(2,'0')+
+  ':'+
+  String(s).padStart(2,'0');
+
+}
+
+function activeElapsed(){
+
+  if(
+    !S.active ||
+    !S.active.start
+  ){
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Math.floor(
+      (
+        Date.now()-
+        Number(S.active.start)
+      )/1000
+    )
+  );
+
+}
+
+function refreshWorkoutTimer(){
+
+  const el=$('#workoutTimerValue');
+
+  if(
+    el &&
+    S.active
+  ){
+
+    el.textContent=
+      fmtTime(
+        activeElapsed()
+      );
+
+  }
+
+}
+
+setInterval(
+  refreshWorkoutTimer,
+  1000
+);
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function dash(){
+
+  const w=bs('w');
+
+  const lw=w[w.length-1];
+  const pw=w[w.length-2];
+
+  const wa=bs('waist');
+
+  const la=wa[wa.length-1];
+
+  const ws=wsorted();
+
+  const last=ws[ws.length-1];
+
+  const t=today();
+
+  const wk=mon(t);
+
+  const pk=addD(wk,-7);
+
+  const ym=monthKey(t);
+
+  const inW=
+    ws.filter(
+      x=>mon(x.date)===wk
+    );
+
+  const inM=
+    ws.filter(
+      x=>monthKey(x.date)===ym
+    );
+
+  const vW=
+    inW.reduce(
+      (a,x)=>
+        a+
+        (Number(x.vol)||0),
+      0
+    );
+
+  const vP=
+    ws
+    .filter(
+      x=>mon(x.date)===pk
+    )
+    .reduce(
+      (a,x)=>
+        a+
+        (Number(x.vol)||0),
+      0
+    );
+
+  const wkS=
+    new Set(
+      ws.map(
+        x=>mon(x.date)
+      )
+    );
+
+  let c=0;
+  let cur=wk;
+
+  if(!wkS.has(cur)){
+    cur=pk;
+  }
+
+  while(wkS.has(cur)){
+
+    c++;
+
+    cur=
+      addD(
+        cur,
+        -7
+      );
+
+  }
+
+  const ins=[
+    'Workout minggu ini: '+inW.length
+  ];
+
+  if(vP&&vW){
+
+    ins.push(
+      `Volume minggu ini ${
+        vW>=vP
+        ? 'naik'
+        : 'turun'
+      } ${
+        Math.abs(
+          Math.round(
+            (vW-vP)/vP*100
+          )
+        )
+      }% dibanding minggu lalu.`
+    );
+
+  }
+
+  let ups=0;
+
+  if(last){
+
+    [
+      ...new Set(
+        S.sets
+        .filter(
+          s=>s.wid===last.id
+        )
+        .map(
+          s=>s.ex
+        )
+      )
+    ].forEach(e=>{
+
+      const h=exH(e);
+
+      if(h.length>1){
+
+        const d=
+          h[h.length-1].mw-
+          h[h.length-2].mw;
+
+        if(d>0){
+          ups++;
+        }
+
+        if(d){
+
+          ins.push(
+            `${e}: ${
+              d>0?'+':''
+            }${num(d)} kg dibanding workout sebelumnya.`
+          );
+
+        }
+
+      }
+
+    });
+
+  }
+
+  if(lw&&pw){
+
+    ins.push(
+      `Berat badan: ${pw.w} kg → ${lw.w} kg.`
+    );
+
+  }
+
+  const wd=
+    [0,1,2,3,4,5,6]
+    .map(i=>{
+
+      const d=
+        addD(wk,i);
+
+      const ww=
+        ws.find(
+          x=>dateOnly(x.date)===d
+        );
+
+      return `
+        <span
+          ${
+            ww
+            ? `class="on" data-t="${esc(ww.type)}"`
+            : ''
+          }
+          ${
+            d===t
+            ? 'style="outline:2px dashed #fffa;outline-offset:2px"'
+            : ''
+          }
+        >
+          ${DAY[i]}
+        </span>
+      `;
+
+    })
+    .join('');
+
+  return `
+
+    <div class="hero">
+
+      <div class="k">
+        Minggu ini
+      </div>
+
+      <div class="big">
+        ${inW.length}
+        <small>workout</small>
+      </div>
+
+      <div class="wk">
+        ${wd}
+      </div>
+
+      <button
+        class="go"
+        onclick="tab='workout';render()"
+      >
+        ${
+          S.active
+          ? 'Lanjutkan '+
+            esc(S.active.type)+
+            ' · '+
+            fmtTime(activeElapsed())
+          : 'Start Workout'
+        }
+      </button>
+
+    </div>
+
+    <div class="grid">
+
+      ${tile(
+        'Berat badan',
+        lw
+        ? lw.w+' kg'
+        : '–'
+      )}
+
+      ${tile(
+        'Perubahan',
+        lw&&pw
+        ? (
+            Number(lw.w)-
+            Number(pw.w)>0
+            ? '+'
+            : ''
+          )+
+          num(
+            Number(lw.w)-
+            Number(pw.w)
+          )+
+          ' kg'
+        : '–'
+      )}
+
+      ${tile(
+        'Lingkar pinggang',
+        la
+        ? la.waist+' cm'
+        : '–'
+      )}
+
+      ${tile(
+        'Streak',
+        c+' minggu'
+      )}
+
+      ${tile(
+        'Volume minggu ini',
+        fmt(vW)+' kg'
+      )}
+
+      ${tile(
+        'Bulan ini',
+        inM.length+' workout'
+      )}
+
+      ${tile(
+        'Total volume',
+        fmt(
+          ws.reduce(
+            (a,x)=>
+              a+
+              (Number(x.vol)||0),
+            0
+          )
+        )+
+        ' kg',
+        'dk'
+      )}
+
+      ${tile(
+        'Progress strength',
+        ups+' exercise naik'
+      )}
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        Workout terakhir
+      </div>
+
+      ${
+        last
+        ? `<b>${esc(last.type)}</b>
+           · ${fd(last.date)}
+           · ${fmt(last.vol)} kg`
+        : 'Belum ada workout.'
+      }
+
+      ${
+        last &&
+        Number(last.cardioDuration)>0
+        ? `
+          <div class="history-cardio">
+            🏃 ${esc(
+              last.cardioType||
+              'Kardio'
+            )}
+            · ${num(
+              last.cardioDuration
+            )} menit
+          </div>
+        `
+        : ''
+      }
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        Frekuensi bulan ini
+      </div>
+
+      ${
+        TYPES.map(x=>{
+
+          const n=
+            inM.filter(
+              m=>m.type===x
+            ).length;
+
+          const mx=
+            Math.max(
+              1,
+              ...TYPES.map(
+                y=>
+                  inM.filter(
+                    m=>m.type===y
+                  ).length
+              )
+            );
+
+          return `
+            <div class="row">
+              <span>${x}</span>
+              <b>${n} kali</b>
+            </div>
+
+            <div
+              class="bar"
+              data-t="${x}"
+            >
+              <i
+                style="width:${n/mx*100}%"
+              ></i>
+            </div>
+          `;
+
+        }).join('')
+      }
+
+    </div>
+
+    <div class="card ins">
+
+      <div class="k">
+        Insight
+      </div>
+
+      ${
+        ins.map(
+          i=>
+            `<p>${esc(i)}</p>`
+        ).join('')
+      }
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        Grafik berat badan
+      </div>
+
+      ${
+        chart(
+          w.map(
+            b=>({v:b.w})
+          ),
+          ' kg'
+        )
+      }
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        Grafik lingkar pinggang
+      </div>
+
+      ${
+        chart(
+          wa.map(
+            b=>({v:b.waist})
+          ),
+          ' cm'
+        )
+      }
+
+    </div>
+
+  `;
+
+}
+
+/* =========================================================
+   TEMPLATES
+========================================================= */
+
+function customTemplates(){
+
+  return Object
+    .keys(S.tpl)
+    .filter(
+      t=>!TYPES.includes(t)
+    );
+
+}
+
+function allTemplates(){
+
+  return [
+    ...TYPES,
+    ...customTemplates()
+  ];
+
+}
+
+function tplSelect(name){
+
+  if(!S.tpl[name]){
+    return;
+  }
+
+  tplT=name;
+
+  save();
+
+  render();
+
+}
+
+function startTemplate(name){
+
+  if(!S.tpl[name]){
+    return;
+  }
+
+  start(name);
+
+}
+
+/* =========================================================
+   WORKOUT VIEW
+========================================================= */
+
+function workout(){
+
+  if(S.active){
+    return act();
+  }
+
+  const l=
+    S.tpl[tplT]||[];
+
+  const templates=
+    allTemplates();
+
+  return `
+
+    <h2>Pilih workout</h2>
+
+    <div class="t5">
+
+      ${
+        templates.map(
+          t=>`
+            <button
+              data-t="${esc(t)}"
+              onclick="startTemplate(this.dataset.t)"
+            >
+              ${esc(t)}
+            </button>
+          `
+        ).join('')
+      }
+
+    </div>
+
+    <h2>Template</h2>
+
+    <div class="tpl-tools">
+
+      <button
+        class="primary"
+        style="background:var(--ac)"
+        onclick="tplNew()"
+      >
+        ＋ Template Baru
+      </button>
+
+      ${
+        !TYPES.includes(tplT)
+        ? `
+          <button
+            class="secondary"
+            onclick="tplRename()"
+          >
+            ✎ Rename
+          </button>
+
+          <button
+            class="secondary"
+            onclick="tplDelete()"
+          >
+            🗑 Hapus
+          </button>
+        `
+        : ''
+      }
+
+    </div>
+
+    <div class="tpl-list">
+
+      ${
+        templates.map(
+          t=>`
+            <button
+              data-t="${esc(t)}"
+              class="chip ${
+                t===tplT
+                ? 'on'
+                : ''
+              }"
+              onclick="tplSelect(this.dataset.t)"
+            >
+              ${esc(t)}
+            </button>
+          `
+        ).join('')
+      }
+
+    </div>
+
+    <div class="card">
+
+      <div class="row">
+
+        <b>
+          ${esc(tplT)}
+        </b>
+
+        <span class="mut">
+          ${l.length} exercise
+        </span>
+
+      </div>
+
+      ${
+        l.map(
+          (e,i)=>`
+            <div class="row">
+
+              <span>
+                ${esc(e)}
+              </span>
+
+              <button
+                class="x"
+                onclick="tplRm(${i})"
+                aria-label="Hapus exercise"
+              >
+                ×
+              </button>
+
+            </div>
+          `
+        ).join('') ||
+        `
+          <div class="tpl-empty">
+            Template ini belum punya exercise.
+          </div>
+        `
+      }
+
+      <div
+        style="
+          display:flex;
+          gap:6px;
+          margin-top:8px
+        "
+      >
+
+        <input
+          id="tn"
+          list="dl"
+          placeholder="Tambah exercise ke ${esc(tplT)}"
+          onkeydown="
+            if(event.key==='Enter'){
+              event.preventDefault();
+              tplAdd()
+            }
+          "
+        >
+
+        <button
+          onclick="tplAdd()"
+        >
+          Tambah
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+/* =========================================================
+   ACTIVE WORKOUT
+========================================================= */
+
+function act(){
+
+  const a=S.active;
+
+  if(!a.cardio){
+
+    a.cardio={
+      type:'',
+      duration:0
+    };
+
+  }
+
+  return `
+
+    <div
+      class="ah"
+      data-t="${esc(a.type)}"
+    >
+
+      <div>
+
+        <div class="big">
+          ${esc(a.type)}
+        </div>
+
+        <div>
+          ${fd(a.date)}
+        </div>
+
+      </div>
+
+      <div style="text-align:right">
+
+        <div
+          class="wtimer"
+          id="workoutTimer"
+        >
+
+          <i></i>
+
+          <span id="workoutTimerValue">
+            ${fmtTime(
+              activeElapsed()
+            )}
+          </span>
+
+        </div>
+
+        <div
+          style="
+            font-size:11px;
+            color:#fff9;
+            margin-top:4px
+          "
+        >
+          durasi workout
+        </div>
+
+      </div>
+
+    </div>
+
+    ${
+      a.ex.map(
+        (e,i)=>`
+
+          <div class="card">
+
+            <b>
+              ${esc(e.name)}
+            </b>
+
+            <button
+              class="x xn"
+              onclick="rmEx(${i})"
+            >
+              ×
+            </button>
+
+            <div
+              class="set"
+              style="
+                margin-top:12px;
+                color:var(--mut);
+                font-size:11px
+              "
+            >
+
+              <span></span>
+
+              <span style="text-align:center">
+                KG
+              </span>
+
+              <span style="text-align:center">
+                REPS
+              </span>
+
+              <span style="text-align:center">
+                RPE
+              </span>
+
+              <span></span>
+
+            </div>
+
+            ${
+              e.sets.map(
+                (s,j)=>`
+
+                  <div class="set">
+
+                    <span>
+                      Set ${j+1}
+
+                      <small id="v${i}_${j}">
+                        ${vol(s)}
+                      </small>
+                    </span>
+
+                    <input
+                      inputmode="decimal"
+                      placeholder="kg"
+                      value="${esc(s.w)}"
+                      oninput="
+                        up(
+                          ${i},
+                          ${j},
+                          'w',
+                          this.value
+                        )
+                      "
+                    >
+
+                    <input
+                      inputmode="numeric"
+                      placeholder="reps"
+                      value="${esc(s.r)}"
+                      oninput="
+                        up(
+                          ${i},
+                          ${j},
+                          'r',
+                          this.value
+                        )
+                      "
+                    >
+
+                    <input
+                      inputmode="decimal"
+                      placeholder="RPE"
+                      value="${esc(s.rpe)}"
+                      oninput="
+                        up(
+                          ${i},
+                          ${j},
+                          'rpe',
+                          this.value
+                        )
+                      "
+                    >
+
+                    <button
+                      class="x"
+                      onclick="rmSet(${i},${j})"
+                    >
+                      ×
+                    </button>
+
+                  </div>
+
+                `
+              ).join('')
+            }
+
+            <button
+              class="ghost"
+              onclick="addSet(${i})"
+            >
+              + Add Set
+            </button>
+
+            <input
+              style="margin-top:8px"
+              placeholder="Catatan exercise (opsional)"
+              value="${esc(e.notes)}"
+              oninput="
+                S.active.ex[${i}].notes=this.value;
+                save()
+              "
+            >
+
+          </div>
+
+        `
+      ).join('')
+    }
+
+    <!-- =========================
+         CARDIO
+    ========================== -->
+
+    <div class="card cardio-card">
+
+      <div class="cardio-head">
+
+        <div class="cardio-title">
+
+          <div class="cardio-icon">
+            🏃
+          </div>
+
+          <div>
+
+            <b>Kardio</b>
+
+            <span>
+              Opsional · catat durasi saja
+            </span>
+
+          </div>
+
+        </div>
+
+        <span class="pill">
+          CARDIO
+        </span>
+
+      </div>
+
+      <div class="cardio-row">
+
+        <select
+          onchange="
+            updateCardio(
+              'type',
+              this.value
+            )
+          "
+        >
+
+          <option value="">
+            Pilih jenis kardio
+          </option>
+
+          ${
+            CARDIO_TYPES.map(
+              x=>`
+                <option
+                  value="${esc(x)}"
+                  ${
+                    a.cardio.type===x
+                    ? 'selected'
+                    : ''
+                  }
+                >
+                  ${esc(x)}
+                </option>
+              `
+            ).join('')
+          }
+
+        </select>
+
+        <div class="cardio-duration">
+
+          <input
+            inputmode="decimal"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="Durasi"
+            value="${
+              a.cardio.duration||''
+            }"
+            oninput="
+              updateCardio(
+                'duration',
+                this.value
+              )
+            "
+          >
+
+          <span>
+            menit
+          </span>
+
+        </div>
+
+      </div>
+
+      <div
+        class="cardio-summary"
+        id="cardioSummary"
+      >
+
+        ${
+          Number(a.cardio.duration)>0
+          ? `
+            <span>
+              ${esc(
+                a.cardio.type||
+                'Kardio'
+              )}
+            </span>
+
+            <b>
+              ${num(
+                a.cardio.duration
+              )} menit
+            </b>
+          `
+          : `
+            <span class="mut">
+              Belum ada durasi kardio
+            </span>
+
+            <b>
+              0 menit
+            </b>
+          `
+        }
+
+      </div>
+
+    </div>
+
+    <!-- =========================
+         ADD EXERCISE
+    ========================== -->
+
+    <div class="card">
+
+      <div
+        style="
+          display:flex;
+          gap:6px
+        "
+      >
+
+        <input
+          id="nx"
+          list="dl"
+          placeholder="Nama exercise"
+          onkeydown="
+            if(event.key==='Enter'){
+              event.preventDefault();
+              addEx()
+            }
+          "
+        >
+
+        <button
+          onclick="addEx()"
+        >
+          Add
+        </button>
+
+      </div>
+
+      <button
+        class="ghost"
+        onclick="addEx()"
+      >
+        + Add Exercise
+      </button>
+
+    </div>
+
+    <input
+      placeholder="Catatan workout (opsional)"
+      value="${esc(a.notes)}"
+      oninput="
+        S.active.notes=this.value;
+        save()
+      "
+      style="margin-bottom:10px"
+    >
+
+    <button
+      class="pri fin"
+      onclick="confirmFinishWorkout()"
+    >
+      Finish Workout
+    </button>
+
+    <button
+      class="x"
+      style="width:100%"
+      onclick="confirmCancelWorkout()"
+    >
+      Batalkan workout
+    </button>
+
+  `;
+
+}
+
+/* =========================================================
+   CARDIO ACTIONS
+========================================================= */
+
+function cardioTotal(){
+
+  if(
+    !S.active ||
+    !S.active.cardio
+  ){
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Number(
+      S.active.cardio.duration
+    )||0
+  );
+
+}
+
+function updateCardio(
+  key,
+  value
+){
+
+  if(!S.active){
+    return;
+  }
+
+  if(!S.active.cardio){
+
+    S.active.cardio={
+      type:'',
+      duration:0
+    };
+
+  }
+
+  if(key==='duration'){
+
+    const v=
+      String(value)
+      .replace(',','.');
+
+    S.active.cardio.duration=
+      Math.max(
+        0,
+        Number(v)||0
+      );
+
+  }else{
+
+    S.active.cardio[key]=value;
+
+  }
+
+  save();
+
+  refreshCardioSummary();
+
+}
+
+function refreshCardioSummary(){
+
+  const el=
+    $('#cardioSummary');
+
+  if(!el){
+    return;
+  }
+
+  const c=
+    S.active?.cardio;
+
+  if(!c){
+    return;
+  }
+
+  const duration=
+    Math.max(
+      0,
+      Number(
+        c.duration
+      )||0
+    );
+
+  el.innerHTML=
+    duration>0
+    ? `
+      <span>
+        ${esc(
+          c.type||
+          'Kardio'
+        )}
+      </span>
+
+      <b>
+        ${num(duration)} menit
+      </b>
+    `
+    : `
+      <span class="mut">
+        Belum ada durasi kardio
+      </span>
+
+      <b>
+        0 menit
+      </b>
+    `;
+
+}
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+function hist(){
+
+  const ws=
+    wsorted()
+    .reverse()
+    .filter(
+      w=>
+        (!hf.t ||
+          w.type===hf.t) &&
+        (!hf.m ||
+          monthKey(w.date)===hf.m)
+    );
+
+  const inM=
+    S.workouts.filter(
+      w=>
+        !hf.m ||
+        monthKey(w.date)===hf.m
+    );
+
+  return `
+
+    <h2>History</h2>
+
+    <input
+      type="month"
+      value="${esc(hf.m)}"
+      onchange="
+        hf.m=this.value;
+        render()
+      "
+    >
+
+    <div class="chips">
+
+      <button
+        class="chip ${
+          !hf.t
+          ? 'on'
+          : ''
+        }"
+        onclick="
+          hf.t='';
+          render()
+        "
+      >
+        Semua
+      </button>
+
+      ${
+        TYPES.map(
+          t=>`
+            <button
+              data-t="${t}"
+              class="chip ${
+                hf.t===t
+                ? 'on'
+                : ''
+              }"
+              onclick="
+                hf.t='${t}';
+                render()
+              "
+            >
+              ${t}
+            </button>
+          `
+        ).join('')
+      }
+
+    </div>
+
+    <div class="card">
+
+      ${
+        TYPES.map(
+          t=>`
+
+            <div class="row">
+
+              <span>
+                ${t}
+              </span>
+
+              <b>
+                ${
+                  inM.filter(
+                    w=>w.type===t
+                  ).length
+                }
+                workouts
+              </b>
+
+            </div>
+
+          `
+        ).join('')
+      }
+
+    </div>
+
+    ${
+      ws.map(
+        w=>{
+
+          const ss=
+            S.sets.filter(
+              s=>s.wid===w.id
+            );
+
+          const ex=[
+            ...new Set(
+              ss.map(
+                s=>s.ex
+              )
+            )
+          ];
+
+          return `
+
+            <div
+              class="card hc"
+              data-t="${esc(w.type)}"
+            >
+
+              <b>
+                ${fd(w.date)}
+              </b>
+
+              <span class="bd">
+                ${esc(w.type)}
+              </span>
+
+              <div class="mut">
+
+                ${w.dur} menit
+
+                · Total
+                ${fmt(w.vol)} kg
+
+              </div>
+
+              ${
+                Number(
+                  w.cardioDuration
+                )>0
+                ? `
+                  <div
+                    class="history-cardio"
+                  >
+                    🏃
+                    <strong>Kardio</strong>
+                    · ${
+                      esc(
+                        w.cardioType||
+                        'Kardio'
+                      )
+                    }
+                    · ${
+                      num(
+                        w.cardioDuration
+                      )
+                    } menit
+                  </div>
+                `
+                : ''
+              }
+
+              ${
+                ex.map(
+                  e=>`
+
+                    <p
+                      style="
+                        margin-top:6px
+                      "
+                    >
+
+                      <b>
+                        ${esc(e)}
+                      </b>
+
+                      <br>
+
+                      ${
+                        ss
+                        .filter(
+                          s=>s.ex===e
+                        )
+                        .map(
+                          s=>
+                            `${num(s.w)} × ${num(s.r)}`
+                        )
+                        .join('<br>')
+                      }
+
+                    </p>
+
+                  `
+                ).join('')
+              }
+
+              ${
+                w.notes
+                ? `
+                  <p
+                    class="mut"
+                    style="margin-top:6px"
+                  >
+                    ${esc(w.notes)}
+                  </p>
+                `
+                : ''
+              }
+
+            </div>
+
+          `;
+
+        }
+      ).join('') ||
+      `
+        <div class="empty">
+          Tidak ada workout.
+        </div>
+      `
+    }
+
+  `;
+
+}
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+function prog(){
+
+  const names=[
+    ...new Set(
+      S.sets.map(
+        s=>s.ex
+      )
+    )
+  ].sort();
+
+  if(!names.length){
+
+    return `
+      <h2>Progress</h2>
+
+      <p class="mut">
+        Selesaikan workout pertama
+        untuk melihat progress.
+      </p>
+    `;
+
+  }
+
+  if(!names.includes(pe)){
+    pe=names[0];
+  }
+
+  const h=exH(pe);
+
+  const all=
+    S.sets.filter(
+      s=>s.ex===pe
+    );
+
+  const str=x=>
+    x&&x.ss?.length
+    ? x.ss
+      .map(
+        s=>
+          `${num(s.w)}×${num(s.r)}`
+      )
+      .join(', ')
+    : '–';
+
+  const L=h[h.length-1];
+  const P=h[h.length-2];
+
+  const current=
+    L?.ss?.length
+    ? L.ss[L.ss.length-1]
+    : null;
+
+  const seq=
+    h
+    .map(
+      x=>x.mw
+    )
+    .filter(
+      (v,i,a)=>
+        i===0 ||
+        v!==a[i-1]
+    )
+    .slice(-8)
+    .join(' → ');
+
+  return `
+
+    <h2>Progress</h2>
+
+    <select
+      onchange="
+        pe=this.value;
+        render()
+      "
+    >
+
+      ${
+        names.map(
+          n=>`
+            <option
+              ${
+                n===pe
+                ? 'selected'
+                : ''
+              }
+            >
+              ${esc(n)}
+            </option>
+          `
+        ).join('')
+      }
+
+    </select>
+
+    <div
+      class="grid"
+      style="margin-top:10px"
+    >
+
+      ${tile(
+        'Beban terkini',
+        current
+        ? num(current.w)+' kg'
+        : '–'
+      )}
+
+      ${tile(
+        'Reps terkini',
+        current
+        ? num(current.r)+' reps'
+        : '–'
+      )}
+
+      ${tile(
+        'Best weight',
+        Math.max(
+          ...all.map(
+            s=>Number(s.w)||0
+          )
+        )+
+        ' kg'
+      )}
+
+      ${tile(
+        'Best reps',
+        Math.max(
+          ...all.map(
+            s=>Number(s.r)||0
+          )
+        )
+      )}
+
+    </div>
+
+    <div class="card">
+
+      <div class="row">
+
+        <span class="k">
+          Workout terakhir
+        </span>
+
+        <span>
+          ${L?fd(L.date):''}
+        </span>
+
+      </div>
+
+      ${str(L)}
+
+      <div
+        class="row"
+        style="margin-top:6px"
+      >
+
+        <span class="k">
+          Previous workout
+        </span>
+
+        <span>
+          ${P?fd(P.date):''}
+        </span>
+
+      </div>
+
+      ${str(P)}
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        ${esc(pe)} progress
+      </div>
+
+      <p>
+        ${seq||'–'}
+      </p>
+
+      ${
+        chart(
+          h.map(
+            x=>({v:x.mw})
+          ),
+          ' kg'
+        )
+      }
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        Personal record
+      </div>
+
+      ${
+        S.prs
+        .filter(
+          p=>p.ex===pe
+        )
+        .reverse()
+        .map(
+          p=>`
+
+            <div class="row">
+
+              <span>
+                🏆 ${esc(p.type)}
+              </span>
+
+              <span>
+                ${num(p.w)} kg
+                × ${num(p.r)}
+                · ${fd(p.date)}
+              </span>
+
+            </div>
+
+          `
+        ).join('') ||
+        `
+          <p class="mut">
+            Belum ada PR.
+          </p>
+        `
+      }
+
+    </div>
+
+  `;
+
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+function body(){
+
+  const L=
+    [...S.body]
+    .sort(
+      (a,b)=>
+        dateOnly(a.date)<
+        dateOnly(b.date)
+        ? 1
+        : -1
+    )
+    .slice(0,10);
+
+  return `
+
+    <h2>Body</h2>
+
+    <div class="card">
+
+      <label class="k">
+        Tanggal
+      </label>
+
+      <input
+        id="bd"
+        type="date"
+        value="${today()}"
+      >
+
+      <div
+        class="grid"
+        style="margin-top:0"
+      >
+
+        <div>
+
+          <label class="k">
+            Berat (kg)
+          </label>
+
+          <input
+            id="bw"
+            inputmode="decimal"
+          >
+
+        </div>
+
+        <div>
+
+          <label class="k">
+            Pinggang (cm)
+          </label>
+
+          <input
+            id="bp"
+            inputmode="decimal"
+          >
+
+        </div>
+
+        <div>
+
+          <label class="k">
+            Body fat % (opsional)
+          </label>
+
+          <input
+            id="bf"
+            inputmode="decimal"
+          >
+
+        </div>
+
+        <div>
+
+          <label class="k">
+            Muscle mass (opsional)
+          </label>
+
+          <input
+            id="bm"
+            inputmode="decimal"
+          >
+
+        </div>
+
+      </div>
+
+      <input
+        id="bn"
+        placeholder="Catatan"
+        style="margin:8px 0"
+      >
+
+      <button
+        class="pri"
+        style="
+          margin:0;
+          font-size:18px
+        "
+        onclick="saveBody()"
+      >
+        Simpan
+      </button>
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        Weight progress
+      </div>
+
+      ${
+        chart(
+          bs('w').map(
+            b=>({v:b.w})
+          ),
+          ' kg'
+        )
+      }
+
+    </div>
+
+    <div class="card">
+
+      <div class="k">
+        Waist progress
+      </div>
+
+      ${
+        chart(
+          bs('waist').map(
+            b=>({v:b.waist})
+          ),
+          ' cm'
+        )
+      }
+
+    </div>
+
+    <div class="card">
+
+      ${
+        L.map(
+          b=>`
+
+            <div class="row">
+
+              <span>
+                ${fd(b.date)}
+              </span>
+
+              <span>
+                ${
+                  b.w!==''
+                  ? b.w+' kg'
+                  : '–'
+                }
+
+                ·
+
+                ${
+                  b.waist!==''
+                  ? b.waist+' cm'
+                  : '–'
+                }
+              </span>
+
+            </div>
+
+          `
+        ).join('') ||
+        `
+          <p class="mut">
+            Belum ada data.
+          </p>
+        `
+      }
+
+    </div>
+
+  `;
+
+}
+
+/* =========================================================
+   WORKOUT ACTIONS
+========================================================= */
+
+const vol=s=>
+  fmt(
+    (Number(s.w)||0)*
+    (Number(s.r)||0)
+  )+
+  ' kg';
+
+function start(t){
+
+  S.active={
+
+    type:t,
+
+    date:today(),
+
+    start:Date.now(),
+
+    notes:'',
+
+    cardio:{
+      type:'',
+      duration:0
+    },
+
+    ex:
+      (S.tpl[t]||[])
+      .map(blank)
+
+  };
+
+  save();
+
+  render();
+
+}
+
+function blank(n){
+
+  const l=
+    [...S.sets]
+    .reverse()
+    .find(
+      s=>s.ex===n
+    );
+
+  return {
+
+    name:n,
+
+    notes:'',
+
+    sets:[
+      {
+        w:l
+          ? l.w
+          : '',
+
+        r:l
+          ? l.r
+          : '',
+
+        rpe:''
+      }
+    ]
+
+  };
+
+}
+
+function ensureEx(n){
+
+  const f=
+    S.exercises.find(
+      e=>
+        e.name.toLowerCase()===
+        n.toLowerCase()
+    );
+
+  if(f){
+    return f.name;
+  }
+
+  const e={
+    id:
+      'E-'+
+      slug(n)+
+      '-'+
+      Date.now(),
+
+    name:n,
+
+    active:true
+  };
+
+  S.exercises.push(e);
+
+  enq(
+    'EXERCISES',
+    [[
+      e.id,
+      e.name,
+      true
+    ]]
+  );
+
+  return n;
+
+}
+
+function addEx(){
+
+  const el=$('#nx');
+
+  if(
+    !el ||
+    !S.active
+  ){
+    return;
+  }
+
+  const v=
+    el.value.trim();
+
+  if(!v){
+    return;
+  }
+
+  S.active.ex.push(
+    blank(
+      ensureEx(v)
+    )
+  );
+
+  save();
+
+  render();
+
+  setTimeout(()=>{
+
+    const n=$('#nx');
+
+    if(n){
+      n.focus();
+    }
+
+  },0);
+
+}
+
+function addSet(i){
+
+  const e=
+    S.active.ex[i];
+
+  const l=
+    e.sets[
+      e.sets.length-1
+    ]||
+    {
+      w:'',
+      r:''
+    };
+
+  e.sets.push({
+
+    w:l.w,
+
+    r:l.r,
+
+    rpe:''
+
+  });
+
+  save();
+
+  render();
+
+}
+
+function rmSet(i,j){
+
+  if(
+    S.active.ex[i] &&
+    S.active.ex[i].sets.length>1
+  ){
+
+    S.active.ex[i].sets.splice(
+      j,
+      1
+    );
+
+  }else{
+
+    S.active.ex[i].sets=[
+      {
+        w:'',
+        r:'',
+        rpe:''
+      }
+    ];
+
+  }
+
+  save();
+
+  render();
+
+}
+
+function rmEx(i){
+
+  S.active.ex.splice(
+    i,
+    1
+  );
+
+  save();
+
+  render();
+
+}
+
+function up(i,j,k,v){
+
+  const cleaned=
+    String(v)
+    .replace(',','.');
+
+  S.active.ex[i].sets[j][k]=
+    cleaned;
+
+  save();
+
+  const el=
+    $('#v'+i+'_'+j);
+
+  if(el){
+
+    el.textContent=
+      vol(
+        S.active.ex[i].sets[j]
+      );
+
+  }
+
+}
+
+function templateNameExists(
+  name,
+  except=''
+){
+
+  const n=
+    name
+    .trim()
+    .toLowerCase();
+
+  return allTemplates()
+    .some(
+      t=>
+        t!==except &&
+        t.toLowerCase()===n
+    );
+
+}
+
+function tplNew(){
+
+  uiPrompt(
+    'Template Baru',
+    'Buat template workout yang bisa kamu gunakan kapan saja.',
+    '',
+    name=>{
+
+      if(
+        templateNameExists(name)
+      ){
+
+        uiAlert(
+          'Nama template sudah digunakan. Pilih nama lain.',
+          'Template sudah ada'
+        );
+
+        return;
+      }
+
+      S.tpl[name]=[];
+
+      tplT=name;
+
+      save();
+
+      render();
+
+      toast(
+        `Template "${name}" dibuat.`
+      );
+
+    },
+    'Contoh: FULL BODY'
+  );
+
+}
+
+function tplRename(){
+
+  if(TYPES.includes(tplT)){
+
+    uiAlert(
+      'Template bawaan tidak bisa di-rename. Buat template baru jika ingin nama sendiri.'
+    );
+
+    return;
+  }
+
+  const old=tplT;
+
+  uiPrompt(
+    'Rename Template',
+    'Ganti nama template ini.',
+    old,
+    name=>{
+
+      if(name===old){
+        return;
+      }
+
+      if(
+        templateNameExists(
+          name,
+          old
+        )
+      ){
+
+        uiAlert(
+          'Nama template sudah digunakan.',
+          'Template sudah ada'
+        );
+
+        return;
+      }
+
+      S.tpl[name]=
+        S.tpl[old]||[];
+
+      delete S.tpl[old];
+
+      tplT=name;
+
+      save();
+
+      render();
+
+      toast(
+        `Template diubah menjadi "${name}".`
+      );
+
+    },
+    'Nama template'
+  );
+
+}
+
+function tplDelete(){
+
+  if(TYPES.includes(tplT)){
+
+    uiAlert(
+      'Template bawaan tidak bisa dihapus.'
+    );
+
+    return;
+  }
+
+  const old=tplT;
+
+  uiConfirm(
+    `Hapus template "${old}"? Riwayat workout tidak akan terhapus.`,
+    ()=>{
+
+      delete S.tpl[old];
+
+      tplT=TYPES[0];
+
+      save();
+
+      render();
+
+      toast(
+        `Template "${old}" dihapus.`
+      );
+
+    },
+    'Hapus Template'
+  );
+
+}
+
+function tplAdd(){
+
+  const el=$('#tn');
+
+  if(!el){
+    return;
+  }
+
+  const v=
+    el.value.trim();
+
+  if(!v){
+    return;
+  }
+
+  S.tpl[tplT]=
+    S.tpl[tplT]||[];
+
+  if(
+    !S.tpl[tplT]
+      .some(
+        x=>
+          x.toLowerCase()===
+          v.toLowerCase()
+      )
+  ){
+
+    S.tpl[tplT].push(
+      ensureEx(v)
+    );
+
+  }
+
+  save();
+
+  render();
+
+}
+
+function tplRm(i){
+
+  S.tpl[tplT].splice(
+    i,
+    1
+  );
+
+  save();
+
+  render();
+
+}
+
+/* =========================================================
+   CONFIRMATIONS
+========================================================= */
+
+function confirmFinishWorkout(){
+
+  uiConfirm(
+    `Workout ${S.active?S.active.type:''} akan disimpan ke History.`,
+    ()=>finish(),
+    'Selesaikan workout?'
+  );
+
+}
+
+function confirmCancelWorkout(){
+
+  uiConfirm(
+    'Semua set yang sudah kamu isi pada workout ini akan dibuang dan tidak masuk ke History.',
+    ()=>{
+
+      S.active=null;
+
+      save();
+
+      render();
+
+    },
+    'Batalkan workout?'
+  );
+
+}
+
+/* =========================================================
+   FINISH WORKOUT
+========================================================= */
+
+function finish(){
+
+  const a=S.active;
+
+  if(!a){
+    return;
+  }
+
+  const exs=
+    a.ex
+    .map(
+      e=>({
+
+        ...e,
+
+        sets:
+          e.sets.filter(
+            s=>
+              Number(s.w)>0 &&
+              Number(s.r)>0
+          )
+
+      })
+    )
+    .filter(
+      e=>e.sets.length
+    );
+
+  if(!exs.length){
+
+    uiAlert(
+      'Isi minimal satu set dengan berat dan reps sebelum menyelesaikan workout.',
+      'Workout belum lengkap'
+    );
+
+    return;
+  }
+
+  const wid=newWid();
+
+  const dur=
+    Math.max(
+      1,
+      Math.round(
+        (
+          Date.now()-
+          a.start
+        )/60000
+      )
+    );
+
+  const prs=[];
+
+  const rows=[];
+
+  let tv=0;
+
+  let sn=0;
+
+  exs.forEach(e=>{
+
+    const previous=
+      S.sets.filter(
+        s=>s.ex===e.name
+      );
+
+    const sets=
+      e.sets.map(
+        s=>({
+
+          w:Number(s.w),
+
+          r:Number(s.r),
+
+          v:
+            Number(s.w)*
+            Number(s.r),
+
+          rpe:
+            s.rpe===''
+            ? ''
+            : Number(s.rpe)
+
+        })
+      );
+
+    const bestWeight=
+      sets.reduce(
+        (a,b)=>
+          b.w>a.w
+          ? b
+          : a,
+        sets[0]
+      );
+
+    const bestReps=
+      sets.reduce(
+        (a,b)=>
+          b.r>a.r
+          ? b
+          : a,
+        sets[0]
+      );
+
+    const bestVolume=
+      sets.reduce(
+        (a,b)=>
+          b.v>a.v
+          ? b
+          : a,
+        sets[0]
+      );
+
+    if(previous.length){
+
+      const oldWeight=
+        previous.reduce(
+          (a,b)=>
+            (Number(b.w)||0)>
+            (Number(a.w)||0)
+            ? b
+            : a,
+          previous[0]
+        );
+
+      const oldReps=
+        previous.reduce(
+          (a,b)=>
+            (Number(b.r)||0)>
+            (Number(a.r)||0)
+            ? b
+            : a,
+          previous[0]
+        );
+
+      const oldVol=
+        previous.reduce(
+          (a,b)=>
+            (Number(b.vol)||0)>
+            (Number(a.vol)||0)
+            ? b
+            : a,
+          previous[0]
+        );
+
+      if(
+        bestWeight.w>
+        (Number(oldWeight.w)||0)
+      ){
+
+        prs.push({
+
+          date:a.date,
+
+          ex:e.name,
+
+          type:'Maximum Weight',
+
+          w:bestWeight.w,
+
+          r:bestWeight.r,
+
+          vol:bestWeight.v,
+
+          pw:oldWeight.w,
+
+          pr:oldWeight.r
+
+        });
+
+      }
+
+      if(
+        bestReps.r>
+        (Number(oldReps.r)||0)
+      ){
+
+        prs.push({
+
+          date:a.date,
+
+          ex:e.name,
+
+          type:'Maximum Reps',
+
+          w:bestReps.w,
+
+          r:bestReps.r,
+
+          vol:bestReps.v,
+
+          pw:oldReps.w,
+
+          pr:oldReps.r
+
+        });
+
+      }
+
+      if(
+        bestVolume.v>
+        (Number(oldVol.vol)||0)
+      ){
+
+        prs.push({
+
+          date:a.date,
+
+          ex:e.name,
+
+          type:'Maximum Volume',
+
+          w:bestVolume.w,
+
+          r:bestVolume.r,
+
+          vol:bestVolume.v,
+
+          pw:oldVol.w,
+
+          pr:oldVol.r
+
+        });
+
+      }
+
+    }
+
+    e.sets.forEach(
+      (s,j)=>{
+
+        const o={
+
+          id:
+            'S'+
+            wid.slice(1)+
+            '-'+
+            pad(++sn),
+
+          wid,
+
+          ex:e.name,
+
+          n:j+1,
+
+          w:s.w,
+
+          r:s.r,
+
+          rpe:s.rpe,
+
+          vol:s.v,
+
+          notes:e.notes||''
+
+        };
+
+        tv+=o.vol;
+
+        S.sets.push(o);
+
+        rows.push(o);
+
+      }
+    );
+
+  });
+
+  const cardio=
+    a.cardio||{
+      type:'',
+      duration:0
+    };
+
+  const cardioType=
+    String(
+      cardio.type||''
+    ).trim();
+
+  const cardioDuration=
+    Math.max(
+      0,
+      Number(
+        cardio.duration
+      )||0
+    );
+
+  const w={
+
+    id:wid,
+
+    date:a.date,
+
+    type:a.type,
+
+    dur,
+
+    vol:tv,
+
+    cardioType,
+
+    cardioDuration,
+
+    notes:a.notes
+
+  };
+
+  S.workouts.push(w);
+
+  S.prs.push(
+    ...prs.map(
+      ({
+        pw,
+        pr,
+        ...p
+      })=>p
+    )
+  );
+
+  S.active=null;
+
+  save();
+
+  /*
+    WORKOUTS:
+    1 workout_id
+    2 date
+    3 workout_type
+    4 duration
+    5 total_volume
+    6 cardio_type
+    7 cardio_duration
+    8 notes
+  */
+
+  enq(
+    'WORKOUTS',
+    [[
+      w.id,
+      w.date,
+      w.type,
+      w.dur,
+      w.vol,
+      w.cardioType,
+      w.cardioDuration,
+      w.notes
+    ]]
+  );
+
+  enq(
+    'SETS',
+    rows.map(
+      o=>[
+        o.id,
+        o.wid,
+        o.ex,
+        o.n,
+        o.w,
+        o.r,
+        o.rpe,
+        o.vol,
+        o.notes
+      ]
+    )
+  );
+
+  if(prs.length){
+
+    enq(
+      'PERSONAL_RECORDS',
+      prs.map(
+        p=>[
+          p.date,
+          p.ex,
+          p.type,
+          p.w,
+          p.r,
+          p.vol
+        ]
+      )
+    );
+
+  }
+
+  tab='hist';
+
+  hf={
+    t:'',
+    m:monthKey(a.date)
+  };
+
+  render();
+
+  const m=
+    document.createElement('div');
+
+  m.className='mod';
+
+  m.onclick=e=>{
+
+    if(e.target===m){
+      m.remove();
+    }
+
+  };
+
+  m.innerHTML=`
+
+    <div>
+
+      <h2>
+        Workout selesai
+      </h2>
+
+      <p>
+        ${esc(a.type)}
+        · ${dur} menit
+        · ${fmt(tv)} kg
+      </p>
+
+      ${
+        cardioDuration>0
+        ? `
+          <div
+            class="card cardio-card"
+            style="margin-top:10px"
+          >
+
+            <div class="row">
+
+              <span>
+                🏃 Kardio
+              </span>
+
+              <b>
+                ${esc(
+                  cardioType||
+                  'Kardio'
+                )}
+              </b>
+
+            </div>
+
+            <div
+              class="row"
+              style="margin-top:4px"
+            >
+
+              <span class="mut">
+                Durasi
+              </span>
+
+              <b>
+                ${num(
+                  cardioDuration
+                )} menit
+              </b>
+
+            </div>
+
+          </div>
+        `
+        : ''
+      }
+
+      ${
+        prs.map(
+          p=>`
+
+            <div class="card pr">
+
+              🏆 NEW PR —
+              ${esc(p.ex)}
+
+              <br>
+
+              ${esc(p.type)}:
+              ${num(p.w)} kg
+              × ${num(p.r)}
+
+              <div class="mut">
+                Previous:
+                ${num(p.pw)} kg
+                × ${num(p.pr)}
+              </div>
+
+            </div>
+
+          `
+        ).join('')
+      }
+
+      <button
+        style="
+          width:100%;
+          margin-top:8px
+        "
+        onclick="
+          this.closest('.mod').remove()
+        "
+      >
+        OK
+      </button>
+
+    </div>
+
+  `;
+
+  document.body.appendChild(m);
+
+}
+
+/* =========================================================
+   BODY SAVE
+========================================================= */
+
+function saveBody(){
+
+  const n=id=>{
+
+    const v=
+      $(id)
+      .value
+      .trim()
+      .replace(',','.');
+
+    return v===''
+      ? ''
+      : Number(v);
+
+  };
+
+  const d=
+    dateOnly(
+      $('#bd').value
+    );
+
+  const r={
+
+    date:d,
+
+    w:n('#bw'),
+
+    waist:n('#bp'),
+
+    bf:n('#bf'),
+
+    mm:n('#bm'),
+
+    notes:
+      $('#bn')
+      .value
+      .trim()
+
+  };
+
+  if(
+    !d ||
+    (
+      r.w==='' &&
+      r.waist===''
+    )
+  ){
+
+    uiAlert(
+      'Isi tanggal dan minimal berat atau pinggang.',
+      'Data body belum lengkap'
+    );
+
+    return;
+  }
+
+  S.body=
+    S.body.filter(
+      b=>
+        dateOnly(b.date)!==d
+    );
+
+  S.body.push(r);
+
+  save();
+
+  enq(
+    'BODY_PROGRESS',
+    [[
+      r.date,
+      r.w,
+      r.waist,
+      r.bf,
+      r.mm,
+      r.notes
+    ]]
+  );
+
+  render();
+
+}
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+const NAV=[
+
+  [
+    'dash',
+    '<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/>',
+    'Dashboard'
+  ],
+
+  [
+    'workout',
+    '<path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/>',
+    'Workout'
+  ],
+
+  [
+    'hist',
+    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    'History'
+  ],
+
+  [
+    'prog',
+    '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+    'Progress'
+  ],
+
+  [
+    'body',
+    '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9a4 4 0 016 0M12 12l2-2"/>',
+    'Body'
+  ]
+
+];
+
+const V={
+  dash,
+  workout,
+  hist,
+  prog,
+  body
+};
+
+function render(){
+
+  const y=scrollY;
+
+  $('#app').innerHTML=
+    V[tab]();
+
+  $('#nav').innerHTML=
+    NAV.map(
+      ([k,i,l])=>`
+
+        <button
+          class="${
+            k===tab
+            ? 'on'
+            : ''
+          }"
+          onclick="
+            tab='${k}';
+            render();
+            scrollTo(0,0)
+          "
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            ${i}
+          </svg>
+
+          ${l}
+
+        </button>
+
+      `
+    ).join('');
+
+  $('#dl').innerHTML=
+    S.exercises
+    .filter(
+      e=>e.active
+    )
+    .map(
+      e=>
+        `<option value="${esc(e.name)}">`
+    )
+    .join('');
+
+  setSt(stat);
+
+  scrollTo(0,y);
+
+}
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+addEventListener(
+  'online',
+  sync
+);
+
+setInterval(
+  sync,
+  30000
+);
+
+/* =========================================================
+   START
+========================================================= */
+
+render();
+
+sync();
+
+</script>
+
+</body>
+</html>
